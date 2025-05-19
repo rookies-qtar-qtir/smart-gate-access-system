@@ -3,7 +3,6 @@ const CONFIG = {
         host: 'broker.emqx.io',
         port: 8083,
         path: '/mqtt',
-        clientId: `mqtt_client_${Math.random().toString(16).substr(2, 8)}`,
         useSSL: false,
     },
     topics: {
@@ -15,7 +14,6 @@ const CONFIG = {
         rfidTopic: '/sensor/rfid',
         accessResultTopic: '/control/access'
     },
-  };
-  
-  export default CONFIG;
-  
+};
+
+export default CONFIG;
