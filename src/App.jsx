@@ -3,18 +3,19 @@ import './App.css'
 import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from 'antd';
 import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import CustomHeader from './components/Header';
 
 const { Footer, Content } = Layout;
 
 const App = () => {
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Layout className="bg-gray-100 flex w-full">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <Layout>
-        <Header />
+        <CustomHeader collapsed={collapsed} setCollapsed={setCollapsed} />
         <Content className="overflow-y-auto">
           <Outlet key={location.pathname} />
         </Content>

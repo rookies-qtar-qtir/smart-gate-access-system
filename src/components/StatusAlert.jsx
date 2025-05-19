@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
 import { Alert } from 'antd';
 import Marquee from 'react-fast-marquee';
-import { useMQTT } from '../services/Connection'; // GUNAKAN hook yang benar
+import { useMQTT } from '../services/Connection';
 
 const StatusAlert = () => {
-  const { status, isConnected } = useMQTT(); // Ambil dari context
+  const { status, isConnected } = useMQTT();
 
   return (
     <Alert
