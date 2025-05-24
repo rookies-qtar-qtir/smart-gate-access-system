@@ -11,6 +11,15 @@ export const MQTTProvider = ({ children }) => {
   const clientRef = useRef(null);
   const connectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
+  const [deviceStatus, setDeviceStatus] = useState({
+    online: false,
+    servo: null,
+    auto_mode: true,
+    ip: "",
+    rssi: null,
+    distance: null,
+    threshold: null,
+  });
 
   const connect = () => {
     connectAttemptsRef.current += 1;
@@ -39,6 +48,16 @@ export const MQTTProvider = ({ children }) => {
       const topic = message.destinationName;
       const payload = message.payloadString;
       console.log("Message arrived: ", topic, payload);
+
+      if (topic === CONFIG.topics.statusTopic) {
+        try {
+          const parsedPayload = JSON.parse(payload);
+          setDeviceStatus(parsedPayload);
+          console.log("Device status updated:", parsedPayload);
+        } catch (error) {
+          console.error("Failed to parse device status:", error);
+        }
+      }
     };
 
     const connectOptions = {
@@ -154,6 +173,7 @@ export const MQTTProvider = ({ children }) => {
         sendMessage,
         reconnect,
         disconnect,
+        deviceStatus,
       }}
     >
       {children}
