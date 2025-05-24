@@ -12,7 +12,7 @@ const App = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Layout className="bg-gray-100 flex w-full">
+    <Layout className="bg-gray-100 flex w-full h-screen">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <Layout>
         <CustomHeader collapsed={collapsed} setCollapsed={setCollapsed} />
