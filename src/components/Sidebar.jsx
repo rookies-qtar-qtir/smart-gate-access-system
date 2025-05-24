@@ -9,6 +9,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import TestPublisher from "../test/PublishJson";
 
 
 function Sidebar({ collapsed, setCollapsed }) {
@@ -78,6 +79,8 @@ function Sidebar({ collapsed, setCollapsed }) {
         <div><span>Broker:</span> <span id="broker-status" className="text-red-400">Disconnected</span></div>
         <div><span>Device:</span> <span id="device-status" className="text-red-400">Disconnected</span></div>
       </div>
+
+      <TestPublisher></TestPublisher>
     </Layout.Sider>
   );
 }
