@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fa';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import StatusAlert from "../components/StatusAlert";
 
 function Home() {
   const navigate = useNavigate();
@@ -39,6 +40,9 @@ function Home() {
       </div>
 
       <div className="container p-6">
+        {/* <StatusAlert /> */}
+        <StatusAlert></StatusAlert>
+
         {/* Status Sistem */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4 text-gray-800 text-left">Status Sistem</h2>
