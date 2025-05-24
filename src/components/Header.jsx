@@ -7,7 +7,7 @@ const CustomHeader = ({ collapsed, setCollapsed }) => {
 
     return (
         <header className="bg-white shadow-md p-4 items-center">
-            <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} className="flex-col flex">
+            <Row gutter={{ xs: 4, sm: 8, md: 16, lg: 24 }} className="flex-col flex">
                 <Col>
                     <Button
                         type="text"
