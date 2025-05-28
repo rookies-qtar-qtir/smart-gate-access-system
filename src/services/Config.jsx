@@ -6,13 +6,8 @@ const CONFIG = {
         useSSL: false,
     },
     topics: {
-        servoTopic: '/control/servo',
         statusTopic: '/device/status',
-        devicePingTopic: '/device/ping',
-        devicePingResponseTopic: '/device/pong',
-        distanceTopic: '/sensor/distance',
         rfidTopic: '/sensor/rfid',
-        accessResultTopic: '/control/access'
     },
 };
 
