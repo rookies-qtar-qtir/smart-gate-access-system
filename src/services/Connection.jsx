@@ -8,9 +8,11 @@ const MQTTContext = createContext();
 export const MQTTProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("Disconnected");
+  const [lastStatusReceived, setLastStatusReceived] = useState(Date.now());
   const clientRef = useRef(null);
   const connectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
+  const heartbeatTimeout = 30000;
   const [deviceStatus, setDeviceStatus] = useState({
     online: false,
     servo: null,
@@ -20,6 +22,7 @@ export const MQTTProvider = ({ children }) => {
     distance: null,
     threshold: null,
   });
+  const [mqttLogs, setMqttLogs] = useState([]);
 
   const connect = () => {
     connectAttemptsRef.current += 1;
@@ -47,17 +50,27 @@ export const MQTTProvider = ({ children }) => {
     client.onMessageArrived = (message) => {
       const topic = message.destinationName;
       const payload = message.payloadString;
+      const now = new Date().toLocaleString();
+
       console.log("Message arrived: ", topic, payload);
 
       if (topic === CONFIG.topics.statusTopic) {
         try {
           const parsedPayload = JSON.parse(payload);
           setDeviceStatus(parsedPayload);
-          console.log("Device status updated:", parsedPayload);
+          setLastStatusReceived(Date.now());
         } catch (error) {
           console.error("Failed to parse device status:", error);
         }
       }
+
+      const logEntry = {
+        time: now,
+        action: "subscribe",
+        message: payload,
+        topic,
+      };
+      setMqttLogs((prev) => [logEntry, ...prev.slice(0, 99)]);
     };
 
     const connectOptions = {
@@ -120,6 +133,17 @@ export const MQTTProvider = ({ children }) => {
         mqttMessage.destinationName = topic;
         mqttMessage.qos = 1;
         clientRef.current.send(mqttMessage);
+
+        setMqttLogs((prev) => [
+          {
+            time: new Date().toLocaleString(),
+            action: "publish",
+            message: payload,
+            topic,
+          },
+          ...prev.slice(0, 99),
+        ]);
+        
         return true;
       } catch (error) {
         console.error("Error sending message:", error);
@@ -153,15 +177,20 @@ export const MQTTProvider = ({ children }) => {
   useEffect(() => {
     connect();
 
-    const pingInterval = setInterval(() => {
-      if (clientRef.current && isConnected) {
-        sendMessage(CONFIG.topics.devicePingTopic, JSON.stringify({ timestamp: Date.now() }));
+    const heartbeatChecker = setInterval(() => {
+      const now = Date.now();
+      if (now - lastStatusReceived > heartbeatTimeout) {
+        // device dianggap offline
+        setDeviceStatus((prev) => ({
+          ...prev,
+          online: false
+        }));
       }
-    }, 60000);
+    }, 10000);
 
     return () => {
       disconnect();
-      clearInterval(pingInterval);
+      clearInterval(heartbeatChecker);
     };
   }, []);
 
@@ -174,6 +203,7 @@ export const MQTTProvider = ({ children }) => {
         reconnect,
         disconnect,
         deviceStatus,
+        lastStatusReceived,
       }}
     >
       {children}

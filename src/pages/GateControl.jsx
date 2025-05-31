@@ -8,7 +8,7 @@ import CONFIG from "../services/Config";
 import { useState } from "react";
 
 function GateControl() {
-  const { deviceStatus, sendMessage } = useMQTT();
+  const { deviceStatus, sendMessage, mqttLogs } = useMQTT();
   const [thresholdValue, setThresholdValue] = useState(deviceStatus.threshold);
 
   const handleThreshold = () => {
@@ -20,26 +20,31 @@ function GateControl() {
     sendMessage(CONFIG.topics.statusTopic, statusPayload);
   };
 
+  const handleGate = (servoStatus) => {
+    const statusPayload = JSON.stringify({
+      ...deviceStatus,
+      servo: servoStatus,
+    });
+  
+    sendMessage(CONFIG.topics.statusTopic, statusPayload);
+  };
+
+  const handleMode = (mode) => {
+    const statusPayload = JSON.stringify({
+      ...deviceStatus,
+      auto_mode: mode,
+    });
+  
+    sendMessage(CONFIG.topics.statusTopic, statusPayload);
+  };
+
+
   // Table columns and data
   const columns = [
-    {
-      title: 'Time',
-      dataIndex: 'time',
-      key: 'time',
-    },
-    {
-      title: 'Action',
-      dataIndex: 'action',
-      key: 'action',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-    },
-  ];
-
-  const data = [
+    { title: "Time", dataIndex: "time", key: "time", width: 180 },
+    { title: "Action", dataIndex: "action", key: "action", width: 100 },
+    { title: "Topic", dataIndex: "topic", key: "topic", width: 200 },
+    { title: "Message", dataIndex: "message", key: "message" },
   ];
 
 
@@ -61,7 +66,7 @@ function GateControl() {
                 className="mx-2"
                 onClick={() => {
                   console.log("Open Gate");
-                  sendMessage(CONFIG.topics.servoTopic, "1");
+                  handleGate("1");
                 }}
               >
                 Open Gate
@@ -74,7 +79,7 @@ function GateControl() {
                 className="mx-2"
                 onClick={() => {
                   console.log("Close Gate");
-                  sendMessage(CONFIG.topics.servoTopic, "0");
+                  handleGate("0");
                 }}
               >
                 Close Gate
@@ -91,11 +96,11 @@ function GateControl() {
               <Switch
                 checkedChildren="Auto"
                 unCheckedChildren="Man"
-                checked={deviceStatus.auto_mode}
+                checked={deviceStatus.auto_mode == 'manual' ? false : true}
                 onChange={(checked) => {
                   const value = checked ? "auto" : "manual";
                   console.log("Switch to", value);
-                  sendMessage(CONFIG.topics.servoTopic, value);
+                  handleMode(value);
                 }}
               />
               <div>
@@ -124,7 +129,7 @@ function GateControl() {
         <Row gutter={8}>
           <Col span={12} className="border-2 rounded-lg border-gray-200 p-6">
             <p>Current Status: </p>
-            <span className="font-semibold text-xl">Open</span>
+            <span className="font-semibold text-xl">{ deviceStatus.servo == '1' ? "Open" : "Closed" }</span>
           </Col>
           <Col span={12}>
             <p>Current Status: </p>
@@ -137,9 +142,7 @@ function GateControl() {
       {/* Section 3: Activity log */}
       <section className="bg-white shadow-sm p-6 rounded-lg mt-4 text-left">
         <p className="-top-10! start-0!">All Log</p>
-        <Table>
-
-        </Table>
+        <Table dataSource={mqttLogs} columns={columns} rowKey={(record, i) => i} pagination={{ pageSize: 10 }} />
       </section>
     </div>
   );

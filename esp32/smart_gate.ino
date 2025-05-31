@@ -68,7 +68,7 @@ long readDistance() {
 void publishStatus() {
   DynamicJsonDocument root(200);
   JsonObject doc = root.to<JsonObject>();
-  doc["online_status"] = true;
+  doc["online_status"] = client.connected();
   doc["servo_status"] = perintah == '1' ? 1 : 0;
   doc["auto_mode"] = autoMode;
   doc["distance_threshold"] = detectionThreshold;
@@ -77,8 +77,12 @@ void publishStatus() {
   char jsonBuffer[256];
   serializeJson(doc, jsonBuffer);
 
-  client.publish(status_topic, jsonBuffer);
-  Serial.println("Status dipublikasikan");
+  if (client.connected()) {
+    client.publish(status_topic, jsonBuffer);
+    Serial.println("Status dipublikasikan (online)");
+  } else {
+    Serial.println("Tidak terkoneksi ke broker, status tidak dipublikasikan");
+  }
 }
 
 // Processes incoming MQTT messages
