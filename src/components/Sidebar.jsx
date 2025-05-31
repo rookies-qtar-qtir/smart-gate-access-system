@@ -2,17 +2,15 @@
 
 import Logo from "./Logo";
 import { Menu, Layout } from 'antd';
-import {
-  HomeOutlined,
-  ControlOutlined,
-  HistoryOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { HomeOutlined, ControlOutlined, HistoryOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import TestPublisher from "../test/PublishJson";
+import { useMQTT } from "../services/Connection";
 
 
 function Sidebar({ collapsed, setCollapsed }) {
+  const { isConnected, deviceStatus } = useMQTT();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -76,8 +74,8 @@ function Sidebar({ collapsed, setCollapsed }) {
       </div>
 
       <div className={`py-4 bg-gray-900 text-sm space-y-1 ${collapsed ? 'text-xs' : 'text-sm'}`}>
-        <div><span>Broker:</span> <span id="broker-status" className="text-red-400">Disconnected</span></div>
-        <div><span>Device:</span> <span id="device-status" className="text-red-400">Disconnected</span></div>
+        <div><span>Broker:</span> <span className={isConnected ? 'text-green-400' : 'text-red-400'}>{isConnected ? 'Connected' : 'Disconnected'}</span></div>
+        <div><span>Device:</span> <span className={deviceStatus.online == true ? 'text-green-400' : 'text-red-400'}>{deviceStatus.online == true ? 'Connected' : 'Disconnected'}</span></div>
       </div>
 
       <TestPublisher></TestPublisher>

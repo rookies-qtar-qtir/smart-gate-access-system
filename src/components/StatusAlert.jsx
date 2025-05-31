@@ -10,8 +10,8 @@ const StatusAlert = () => {
       banner
       message={
         <Marquee pauseOnHover gradient={false}>
-          MQTT Status: {status} ({isConnected ? "Online" : "Offline"})
-        </Marquee>
+          MQTT Status: {isConnected ? " Connected to Broker (Online)" : " Disconnected from Broker (Offline)"}
+        </Marquee>  
       }
       type={isConnected ? 'success' : 'error'}
     />
