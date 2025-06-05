@@ -79,6 +79,8 @@ export const MQTTProvider = ({ children }) => {
       cleanSession: true,
       reconnect: true,
       timeout: 10,
+      userName: CONFIG.broker.username,
+      password: CONFIG.broker.password,
       onSuccess: () => {
         connectAttemptsRef.current = 0;
         setIsConnected(true);
@@ -143,7 +145,7 @@ export const MQTTProvider = ({ children }) => {
           },
           ...prev.slice(0, 99),
         ]);
-        
+
         return true;
       } catch (error) {
         console.error("Error sending message:", error);
