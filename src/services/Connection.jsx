@@ -2,8 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Client, Message } from "paho-mqtt";
 import { message as antdMessage } from "antd";
 import CONFIG from "./Config";
-
-const MQTTContext = createContext();
+import { MQTTContext } from "./MqttContext";
 
 export const MQTTProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
@@ -206,11 +205,10 @@ export const MQTTProvider = ({ children }) => {
         disconnect,
         deviceStatus,
         lastStatusReceived,
+        mqttLogs,
       }}
     >
       {children}
     </MQTTContext.Provider>
   );
 };
-
-export const useMQTT = () => useContext(MQTTContext);

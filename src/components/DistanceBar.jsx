@@ -1,5 +1,5 @@
 import { Progress } from "antd";
-import { useMQTT } from '../services/Connection';
+import { useMQTT } from "../services/MqttContext";
 import { PiXCircleDuotone } from "react-icons/pi";
 
 const DistanceBar = () => {

@@ -3,7 +3,7 @@ import DistanceBar from "../components/DistanceBar";
 import { Col, Row, Button, Switch, InputNumber, Table } from 'antd';
 import { FaDoorClosed, FaDoorOpen } from "react-icons/fa";
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { useMQTT } from "../services/Connection";
+import { useMQTT } from "../services/MqttContext.jsx";
 import CONFIG from "../services/Config";
 import { useState } from "react";
 
@@ -16,7 +16,7 @@ function GateControl() {
       ...deviceStatus,
       threshold: thresholdValue ?? deviceStatus.threshold,
     });
-  
+
     sendMessage(CONFIG.topics.statusTopic, statusPayload);
   };
 
@@ -25,7 +25,7 @@ function GateControl() {
       ...deviceStatus,
       servo: servoStatus,
     });
-  
+
     sendMessage(CONFIG.topics.statusTopic, statusPayload);
   };
 
@@ -34,7 +34,7 @@ function GateControl() {
       ...deviceStatus,
       auto_mode: mode,
     });
-  
+
     sendMessage(CONFIG.topics.statusTopic, statusPayload);
   };
 
@@ -93,32 +93,32 @@ function GateControl() {
           <section className="bg-white shadow-sm p-6 rounded-lg mt-4">
             <h2 className="text-xl font-semibold mb-4">Gate Configuration</h2>
             <p>Gate Closing Sensor:</p>
-              <Switch
-                checkedChildren="Auto"
-                unCheckedChildren="Man"
-                checked={deviceStatus.auto_mode == 'manual' ? false : true}
-                onChange={(checked) => {
-                  const value = checked ? "auto" : "manual";
-                  console.log("Switch to", value);
-                  handleMode(value);
+            <Switch
+              checkedChildren="Auto"
+              unCheckedChildren="Man"
+              checked={deviceStatus.auto_mode == 'manual' ? false : true}
+              onChange={(checked) => {
+                const value = checked ? "auto" : "manual";
+                console.log("Switch to", value);
+                handleMode(value);
+              }}
+            />
+            <div>
+              <p className="mt-4">Distance Threshold:</p>
+              <InputNumber
+                suffix="cm"
+                keyboard={false}
+                style={{ width: '25%' }}
+                placeholder={deviceStatus.threshold}
+                value={thresholdValue}
+                onChange={(value) => setThresholdValue(value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleThreshold();
+                  }
                 }}
               />
-              <div>
-                <p className="mt-4">Distance Threshold:</p>
-                <InputNumber 
-                  suffix="cm" 
-                  keyboard={false}
-                  style={{ width: '25%' }} 
-                  placeholder={deviceStatus.threshold} 
-                  value={thresholdValue}
-                  onChange={(value) => setThresholdValue(value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleThreshold();
-                    }
-                  }}
-                />
-              </div>
+            </div>
           </section>
         </Col>
       </Row>
@@ -129,7 +129,7 @@ function GateControl() {
         <Row gutter={8}>
           <Col span={12} className="border-2 rounded-lg border-gray-200 p-6">
             <p>Current Status: </p>
-            <span className="font-semibold text-xl">{ deviceStatus.servo == '1' ? "Open" : "Closed" }</span>
+            <span className="font-semibold text-xl">{deviceStatus.servo == '1' ? "Open" : "Closed"}</span>
           </Col>
           <Col span={12}>
             <p>Current Status: </p>

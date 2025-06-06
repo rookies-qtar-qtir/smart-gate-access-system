@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "antd";
-import { useMQTT } from "../services/Connection";
+import { useMQTT } from "../services/MqttContext";
 import CONFIG from "../services/Config";
 
 const TestPublisher = () => {

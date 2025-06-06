@@ -1,12 +1,12 @@
 import { Button } from "antd";
 import { Col, Row, Divider } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
-import { useMQTT } from "../services/Connection";
+import { useMQTT } from "../services/MqttContext";
 
 const CustomHeader = ({ collapsed, setCollapsed }) => {
     const location = window.location;
     const { lastStatusReceived } = useMQTT();
-    
+
     // Format the timestamp for display
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return "-";

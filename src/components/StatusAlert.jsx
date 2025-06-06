@@ -1,6 +1,6 @@
 import { Alert } from 'antd';
 import Marquee from 'react-fast-marquee';
-import { useMQTT } from '../services/Connection';
+import { useMQTT } from '../services/MqttContext.jsx';
 
 const StatusAlert = () => {
   const { status, isConnected } = useMQTT();
@@ -11,7 +11,7 @@ const StatusAlert = () => {
       message={
         <Marquee pauseOnHover gradient={false}>
           MQTT Status: {isConnected ? " Connected to Broker (Online)" : " Disconnected from Broker (Offline)"}
-        </Marquee>  
+        </Marquee>
       }
       type={isConnected ? 'success' : 'error'}
     />
