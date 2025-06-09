@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Button } from "antd";
+import { Modal, Form, Input, Button, Switch } from "antd";
 import { UserOutlined, MailOutlined, KeyOutlined } from "@ant-design/icons";
 
 function UserFormModal({
@@ -8,10 +8,9 @@ function UserFormModal({
 	onSubmit,
 	onCancel,
 	form,
-	users,
 	checkUidUnique,
+	checkEmailUnique,
 }) {
-	// Custom validator for UID uniqueness
 	const validateUid = (_, value) => {
 		if (!value) {
 			return Promise.resolve();
@@ -25,6 +24,21 @@ function UserFormModal({
 
 		return Promise.resolve();
 	};
+
+	const validateEmail = (_, value) => {
+		if (!value) {
+			return Promise.resolve();
+		}
+
+		if (!checkEmailUnique(value, editingUser?.id)) {
+			return Promise.reject(
+				new Error("This email already exists! Please use a unique email.")
+			);
+		}
+
+		return Promise.resolve();
+	};
+
 	return (
 		<Modal
 			title={editingUser ? "Edit User" : "Add New User"}
@@ -36,7 +50,8 @@ function UserFormModal({
 				form={form}
 				layout="vertical"
 				onFinish={onSubmit}
-				className="mt-4">
+				className="mt-4"
+				initialValues={{ isActive: true }}>
 				<Form.Item
 					label="UID"
 					name="uid"
@@ -55,7 +70,7 @@ function UserFormModal({
 							message:
 								"UID can only contain letters and numbers!",
 						},
-						{ validator: validateUid }, // jika kamu punya validator tambahan
+						{ validator: validateUid },
 					]}
 					hasFeedback>
 					<Input
@@ -70,6 +85,7 @@ function UserFormModal({
 						}}
 					/>
 				</Form.Item>
+
 				<Form.Item
 					label="Name"
 					name="name"
@@ -96,12 +112,25 @@ function UserFormModal({
 							type: "email",
 							message: "Please enter a valid email!",
 						},
-					]}>
+						{ validator: validateEmail },
+					]}
+					hasFeedback>
 					<Input 
-                        prefix={<MailOutlined />}
-                        placeholder="Enter email address"
-                        size="large" 
-                    />
+						prefix={<MailOutlined />}
+						placeholder="Enter email address"
+						size="large" 
+					/>
+				</Form.Item>
+
+				<Form.Item
+					label="Status"
+					name="isActive"
+					valuePropName="checked">
+					<Switch
+						checkedChildren="Active"
+						unCheckedChildren="Inactive"
+						size="default"
+					/>
 				</Form.Item>
 
 				<Form.Item className="mb-0 pt-4">

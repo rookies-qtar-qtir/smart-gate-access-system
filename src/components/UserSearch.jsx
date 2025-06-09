@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Button, Input, message, Popconfirm } from "antd";
+import { Button, Input, message, Popconfirm, Tag } from "antd";
 import {
 	SearchOutlined,
 	EditOutlined,
 	DeleteOutlined,
+	CheckCircleOutlined,
+	CloseCircleOutlined,
 } from "@ant-design/icons";
 import { userService } from "../services/api";
 
-function UserSearch({ onEditUser, onDeleteUser }) {
+function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 	const [searchUid, setSearchUid] = useState("");
 	const [searchResult, setSearchResult] = useState(null);
 	const [searchLoading, setSearchLoading] = useState(false);
@@ -35,6 +37,15 @@ function UserSearch({ onEditUser, onDeleteUser }) {
 	const clearSearch = () => {
 		setSearchUid("");
 		setSearchResult(null);
+	};
+
+	const handleEdit = (user) => {
+		onEditUser(user);
+		if (onUserUpdated) {
+			onUserUpdated(() => {
+				handleSearchByUid();
+			});
+		}
 	};
 
 	const handleDelete = async (userId) => {
@@ -91,7 +102,7 @@ function UserSearch({ onEditUser, onDeleteUser }) {
 			{searchResult && (
 				<div className="border-t border-gray-100 px-6 py-6">
 					<div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 							<div>
 								<p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
 									UID
@@ -116,12 +127,33 @@ function UserSearch({ onEditUser, onDeleteUser }) {
 									{searchResult.email}
 								</p>
 							</div>
+							<div>
+								<p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+									Status
+								</p>
+								<Tag
+									color={
+										searchResult.isActive ? "green" : "red"
+									}
+									icon={
+										searchResult.isActive ? (
+											<CheckCircleOutlined />
+										) : (
+											<CloseCircleOutlined />
+										)
+									}
+									className="text-sm">
+									{searchResult.isActive
+										? "Active"
+										: "Inactive"}
+								</Tag>
+							</div>
 						</div>
 						<div className="mt-5 pt-4 border-t border-blue-200 flex gap-3">
 							<Button
 								type="primary"
 								icon={<EditOutlined />}
-								onClick={() => onEditUser(searchResult)}
+								onClick={() => handleEdit(searchResult)}
 								className="rounded-lg">
 								Edit User
 							</Button>

@@ -1,7 +1,19 @@
-import { Table, Button, Popconfirm, Space } from "antd";
-import { UserOutlined, EditOutlined, DeleteOutlined, MailOutlined, KeyOutlined } from "@ant-design/icons";
+import { Table, Button, Popconfirm, Space, Tag } from "antd";
+import {
+	UserOutlined,
+	EditOutlined,
+	DeleteOutlined,
+	MailOutlined,
+	KeyOutlined,
+	CheckCircleOutlined,
+	CloseCircleOutlined,
+} from "@ant-design/icons";
+import { useState } from "react";
 
 function UserTable({ users, loading, onEditUser, onDeleteUser }) {
+	const [currentPage, setCurrentPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
+
 	const columns = [
 		{
 			title: "ID",
@@ -16,7 +28,7 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 			width: 170,
 			render: (text) => (
 				<span className="font-medium text-xs bg-gray-100 px-2 py-1 rounded">
-                    <KeyOutlined className="mr-2" />
+					<KeyOutlined className="mr-2" />
 					{text}
 				</span>
 			),
@@ -36,12 +48,31 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 			title: "Email",
 			dataIndex: "email",
 			key: "email",
-            render: (text) => (
-                <span className="font-medium">
-                    <MailOutlined className="mr-2" />
-                    {text}
-                </span> 
-            ),
+			render: (text) => (
+				<span className="font-medium">
+					<MailOutlined className="mr-2" />
+					{text}
+				</span>
+			),
+		},
+		{
+			title: "Status",
+			dataIndex: "isActive",
+			key: "isActive",
+			width: 100,
+			render: (isActive) => (
+				<Tag
+					color={isActive ? "green" : "red"}
+					icon={
+						isActive ? (
+							<CheckCircleOutlined />
+						) : (
+							<CloseCircleOutlined />
+						)
+					}>
+					{isActive ? "Active" : "Inactive"}
+				</Tag>
+			),
 		},
 		{
 			title: "Actions",
@@ -75,20 +106,43 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 		},
 	];
 
+	const handlePaginationChange = (page, size) => {
+		setCurrentPage(page);
+		if (size !== pageSize) {
+			setPageSize(size);
+		}
+	};
+
+	const handleShowSizeChange = (current, size) => {
+		setCurrentPage(1);
+		setPageSize(size);
+	};
+
 	return (
 		<section className="bg-white shadow-sm p-6 rounded-lg mt-4">
-			<h3 className="text-lg font-semibold mb-4">Users List</h3>
+			<h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+				Users List
+				<span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+					{users?.length || 0}
+				</span>
+			</h3>
 			<Table
 				dataSource={users}
 				columns={columns}
 				rowKey="id"
 				loading={loading}
 				pagination={{
-					pageSize: 10,
+					position: ["bottomCenter"],
+					current: currentPage,
+					pageSize: pageSize,
+					total: users?.length || 0,
 					showSizeChanger: true,
 					showQuickJumper: true,
+					pageSizeOptions: ["10", "20", "50", "100"],
 					showTotal: (total, range) =>
 						`${range[0]}-${range[1]} of ${total} users`,
+					onChange: handlePaginationChange,
+					onShowSizeChange: handleShowSizeChange,
 				}}
 				className="border rounded-lg"
 			/>

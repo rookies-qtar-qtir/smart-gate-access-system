@@ -12,6 +12,7 @@ function Users() {
 	const [loading, setLoading] = useState(false);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [editingUser, setEditingUser] = useState(null);
+	const [onUserUpdatedCallback, setOnUserUpdatedCallback] = useState(null);
 	const [form] = Form.useForm();
 
 	const fetchUsers = async () => {
@@ -39,7 +40,17 @@ function Users() {
 		);
 	};
 
+	const checkEmailUnique = (email, excludeId = null) => {
+		return !users.some(
+			(user) =>
+				user.email.toLowerCase() === email.toLowerCase() &&
+				user.id !== excludeId
+		);
+	};
+
 	const handleSubmit = async (values) => {
+		console.log("Form values submitted:", values);
+
 		if (!editingUser && !checkUidUnique(values.uid)) {
 			message.error("UID already exists! Please use a unique UID.");
 			return;
@@ -49,23 +60,49 @@ function Users() {
 			message.error("UID already exists! Please use a unique UID.");
 			return;
 		}
+		
+		if (!editingUser && !checkEmailUnique(values.email)) {
+			message.error("Email already exists! Please use a unique email.");
+			return;
+		}
+
+		if (editingUser && !checkEmailUnique(values.email, editingUser.id)) {
+			message.error("Email already exists! Please use a unique email.");
+			return;
+		}
 
 		setLoading(true);
 		try {
+			const userData = {
+				uid: values.uid,
+				name: values.name,
+				email: values.email,
+				isActive: values.isActive !== undefined ? values.isActive : true
+			};
+
+			console.log("Sending userData:", userData);
+
 			if (editingUser) {
-				await userService.updateUser(editingUser.id, values);
+				await userService.updateUser(editingUser.id, userData);
 				message.success("User updated successfully");
 			} else {
-				await userService.createUser(values);
+				await userService.createUser(userData);
 				message.success("User created successfully");
 			}
 			setModalVisible(false);
 			setEditingUser(null);
 			form.resetFields();
 			fetchUsers();
+			
+			if (onUserUpdatedCallback) {
+				onUserUpdatedCallback();
+				setOnUserUpdatedCallback(null);
+			}
 		} catch (error) {
 			if (error.message && error.message.includes("UID")) {
 				message.error("UID already exists! Please use a unique UID.");
+			} else if (error.message && error.message.includes("email")) {
+				message.error("Email already exists! Please use a unique email.");
 			} else {
 				message.error(
 					`Failed to ${editingUser ? "update" : "create"} user`
@@ -91,14 +128,24 @@ function Users() {
 		}
 	};
 
+	const handleUserUpdated = (callback) => {
+		setOnUserUpdatedCallback(() => callback);
+	};
+
 	const handleEditUser = (user = null) => {
 		setEditingUser(user);
 		setModalVisible(true);
 
 		if (user) {
-			form.setFieldsValue(user);
+			form.setFieldsValue({
+				uid: user.uid,
+				name: user.name,
+				email: user.email,
+				isActive: user.isActive
+			});
 		} else {
 			form.resetFields();
+			form.setFieldsValue({ isActive: true });
 		}
 	};
 
@@ -116,11 +163,8 @@ function Users() {
 			<div className="bg-white shadow-sm p-6 rounded-lg mt-4">
 				<div className="flex justify-between items-center">
 					<div>
-						<h2 className="text-xl font-semibold">
-							User Management
-						</h2>
 						<p className="text-gray-600">
-							Manage system users here.
+							Manage system users and their status here.
 						</p>
 					</div>
 					<Button
@@ -137,6 +181,7 @@ function Users() {
 			<UserSearch
 				onEditUser={handleEditUser}
 				onDeleteUser={handleDelete}
+				onUserUpdated={handleUserUpdated}
 			/>
 
 			{/* Users Table Component */}
@@ -157,6 +202,7 @@ function Users() {
 				form={form}
 				users={users}
 				checkUidUnique={checkUidUnique}
+				checkEmailUnique={checkEmailUnique}
 			/>
 		</div>
 	);
