@@ -4,6 +4,7 @@ const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://[::1]:3000',
   ENDPOINTS: {
     USERS: '/users',
+    ACCESS_LOGS: '/access-logs',
   },
   HEADERS: {
     'Content-Type': 'application/json',
@@ -104,6 +105,73 @@ export const userService = {
       return response.data;
     } catch (error) {
       console.error('Error deleting user:', error);
+      throw error;
+    }
+  },
+};
+
+
+export const accessLogsApi = {
+  async getAll() {
+    try {
+      const response = await api.get(API_CONFIG.ENDPOINTS.ACCESS_LOGS);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching access logs:', error);
+      throw error;
+    }
+  },
+
+  async getByUid(uid) {
+    try {
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/uid/${uid}`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching access logs by UID:', error);
+      throw error;
+    }
+  },
+
+  async getByDateRange(startDate, endDate) {
+    try {
+      const params = new URLSearchParams({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/date-range?${params}`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching access logs by date range:', error);
+      throw error;
+    }
+  },
+
+  async getGranted() {
+    try {
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/granted`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching granted access logs:', error);
+      throw error;
+    }
+  },
+
+  async getDenied() {
+    try {
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/denied`);
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching denied access logs:', error);
+      throw error;
+    }
+  },
+
+  async processRFIDAccess(uid) {
+    try {
+      const response = await api.post(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/process`, { uid });
+      return response.data;
+    } catch (error) {
+      console.error('Error processing RFID access:', error);
       throw error;
     }
   },

@@ -3,7 +3,7 @@ import DistanceBar from "../components/DistanceBar";
 import { Col, Row, Button, Switch, InputNumber, Table } from 'antd';
 import { FaDoorClosed, FaDoorOpen } from "react-icons/fa";
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { useMQTT } from "../services/MqttContext.jsx";
+import { useMQTT } from "../services/MqttContext";
 import CONFIG from "../services/Config";
 import { useState } from "react";
 
