@@ -6,6 +6,7 @@ import { HomeOutlined, ControlOutlined, HistoryOutlined, UserOutlined } from '@a
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import TestPublisher from "../test/PublishJson";
 import { useMQTT } from "../services/MqttContext";
+import RFIDTestPublisher from "../test/PublishRfid";
 
 
 function Sidebar({ collapsed, setCollapsed }) {
@@ -78,7 +79,8 @@ function Sidebar({ collapsed, setCollapsed }) {
         <div><span>Device:</span> <span className={deviceStatus.online == true ? 'text-green-400' : 'text-red-400'}>{deviceStatus.online == true ? 'Connected' : 'Disconnected'}</span></div>
       </div>
 
-      <TestPublisher></TestPublisher>
+      <TestPublisher />
+      <RFIDTestPublisher />
     </Layout.Sider>
   );
 }
