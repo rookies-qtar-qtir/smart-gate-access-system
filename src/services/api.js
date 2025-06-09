@@ -64,6 +64,9 @@ export const userService = {
       const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS}/uid/${uid}`);
       return response.data.data;
     } catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
       console.error('Error fetching user by UID:', error);
       throw error;
     }
@@ -172,7 +175,12 @@ export const accessLogsApi = {
       return response.data;
     } catch (error) {
       console.error('Error processing RFID access:', error);
-      throw error;
+      return {
+        access: false,
+        message: 'System error during access processing',
+        user: null,
+        accessLog: null
+      };
     }
   },
 };

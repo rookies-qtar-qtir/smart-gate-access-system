@@ -3,6 +3,7 @@ import { Client, Message } from "paho-mqtt";
 import { message as antdMessage } from "antd";
 import CONFIG from "./Config";
 import { MQTTContext } from "./MqttContext";
+import { userService, accessLogsApi } from "./api.js";
 
 export const MQTTProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
@@ -22,6 +23,8 @@ export const MQTTProvider = ({ children }) => {
     threshold: null,
   });
   const [mqttLogs, setMqttLogs] = useState([]);
+  const [rfidPayload, setRfidPayload] = useState(null);
+  const subscribedTopics = useRef(new Set());
 
   const connect = () => {
     connectAttemptsRef.current += 1;
@@ -63,6 +66,21 @@ export const MQTTProvider = ({ children }) => {
         }
       }
 
+      if (topic === CONFIG.topics.rfidTopic) {
+        try {
+          const parsedPayload = JSON.parse(payload);
+          setRfidPayload(parsedPayload);
+          setLastStatusReceived(Date.now());
+
+          // Process RFID access when UID is received
+          if (parsedPayload.uid) {
+            processRFIDAccess(parsedPayload.uid);
+          }
+        } catch (error) {
+          console.error("Failed to parse RFID payload:", error);
+        }
+      }
+
       const logEntry = {
         time: now,
         action: "subscribe",
@@ -87,11 +105,14 @@ export const MQTTProvider = ({ children }) => {
         antdMessage.success("Connected to MQTT broker");
 
         Object.values(CONFIG.topics).forEach((topic) => {
-          try {
-            client.subscribe(topic, { qos: 1 });
-            console.log(`Subscribed to ${topic}`);
-          } catch (error) {
-            console.error(`Failed to subscribe to ${topic}:`, error);
+          if (!subscribedTopics.current.has(topic)) {
+            try {
+              client.subscribe(topic, { qos: 0 });
+              subscribedTopics.current.add(topic);
+              console.log(`Subscribed to ${topic}`);
+            } catch (error) {
+              console.error(`Failed to subscribe to ${topic}:`, error);
+            }
           }
         });
       },
@@ -175,6 +196,47 @@ export const MQTTProvider = ({ children }) => {
     connectAttemptsRef.current = 0;
   };
 
+  const processRFIDAccess = async (uid) => {
+    try {
+      const user = await userService.getUserByUid(uid);
+
+      if (user) {
+        console.log("User found:", user);
+        antdMessage.success(`Access granted for ${user.name}`);
+
+        const accessResult = await accessLogsApi.processRFIDAccess(uid);
+        console.log("Access result:", accessResult);
+
+        if (accessResult.access) {
+          const gateOpenPayload = JSON.stringify({
+            ...deviceStatus,
+            servo: "1",
+          });
+          sendMessage(CONFIG.topics.statusTopic, gateOpenPayload);
+        }
+
+        return accessResult;
+      } else {
+        console.log("User not found for UID:", uid);
+        antdMessage.error("Access denied - UID not registered");
+
+        const accessResult = await accessLogsApi.processRFIDAccess(uid);
+        return accessResult;
+      }
+    } catch (error) {
+      console.error("Error processing RFID access:", error);
+      antdMessage.error("Error processing RFID access");
+
+      try {
+        const errorResult = await accessLogsApi.processRFIDAccess(uid);
+        return errorResult;
+      } catch (logError) {
+        console.error("Error logging access attempt:", logError);
+        return null;
+      }
+    }
+  };
+
   useEffect(() => {
     connect();
 
@@ -206,6 +268,7 @@ export const MQTTProvider = ({ children }) => {
         deviceStatus,
         lastStatusReceived,
         mqttLogs,
+        rfidPayload,
       }}
     >
       {children}
