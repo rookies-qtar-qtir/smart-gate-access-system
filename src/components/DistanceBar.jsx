@@ -10,7 +10,7 @@ const DistanceBar = () => {
     percentage = Math.max(0, 100 - (((deviceStatus.distance - deviceStatus.threshold) / deviceStatus.threshold) * 100));
 
     return (
-        <div className="bg-white shadow-sm rounded-lg mt-4 w-56">
+        <div className="">
             <h2 className="text-xl font-semibold mb-4">Distance Threshold</h2>
             <Progress
                 percent={percentage}

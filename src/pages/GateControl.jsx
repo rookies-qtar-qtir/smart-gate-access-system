@@ -125,13 +125,13 @@ function GateControl() {
 
       {/* Section 2: Gate Status Monitor */}
       <section className="bg-white shadow-sm p-6 rounded-lg mt-4 text-left">
-        <p className="-top-10! start-0!">Gate Status Monitor</p>
-        <Row gutter={8}>
+        <p className="-top-10! start-0! font-bold text-xl">Gate Status Monitor</p>
+        <Row gutter={16}>
           <Col span={12} className="border-2 rounded-lg border-gray-200 p-6">
             <p>Current Status: </p>
             <span className="font-semibold text-xl">{deviceStatus.servo == '1' ? "Open" : "Closed"}</span>
           </Col>
-          <Col span={12}>
+          <Col span={12} className="border-2 rounded-lg border-gray-200 p-6">
             <p>Current Status: </p>
             <DistanceBar></DistanceBar>
           </Col>

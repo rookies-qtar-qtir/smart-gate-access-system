@@ -39,7 +39,7 @@ function Home() {
         </div>
       </div>
 
-      <div className="container p-6">
+      <div className="p-6">
         {/* <StatusAlert /> */}
         <StatusAlert></StatusAlert>
 
