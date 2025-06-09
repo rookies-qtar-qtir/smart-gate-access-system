@@ -115,10 +115,10 @@ function UserFormModal({
 						{ validator: validateEmail },
 					]}
 					hasFeedback>
-					<Input 
+					<Input
 						prefix={<MailOutlined />}
 						placeholder="Enter email address"
-						size="large" 
+						size="large"
 					/>
 				</Form.Item>
 

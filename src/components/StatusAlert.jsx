@@ -1,6 +1,6 @@
 import { Alert } from 'antd';
 import Marquee from 'react-fast-marquee';
-import { useMQTT } from '../services/MqttContext.jsx';
+import { useMQTT } from '../services/MqttContext';
 
 const StatusAlert = () => {
   const { status, isConnected } = useMQTT();
