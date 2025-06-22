@@ -9,7 +9,7 @@ const TestPublisher = () => {
   const publishTestStatus = () => {
     const testPayload = {
       online: true,
-      servo: 1,
+      servo: "1",
       auto_mode: true,
       ip: "192.168.1.100",
       rssi: 60,

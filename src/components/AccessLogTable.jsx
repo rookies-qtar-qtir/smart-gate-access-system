@@ -24,6 +24,17 @@ function AccessLogTable({ logs, loading }) {
 			defaultSortOrder: "descend",
 		},
 		{
+			title: "Vehicle",
+			dataIndex: "vehicle",
+			key: "vehicle",
+			width: 150,
+			render: (vehicle) => (
+				<span className="font-medium">
+					{vehicle ? vehicle : <span className="text-gray-400">Unknown</span>}
+				</span>
+			),
+		},
+		{
 			title: "UID",
 			dataIndex: "uid",
 			key: "uid",
