@@ -169,10 +169,28 @@ export const accessLogsApi = {
     }
   },
 
-  async processRFIDAccess(uid) {
+  async processRFIDAccess(uid, imageFile) {
     try {
-      const response = await api.post(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/process`, { uid });
+      const formData = new FormData();
+      formData.append('uid', uid);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      const response = await api.post(
+        `${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/process`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
       return response.data;
+
+      // const response = await api.post(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/process`, { uid });
+      // return response.data;
     } catch (error) {
       console.error('Error processing RFID access:', error);
       return {

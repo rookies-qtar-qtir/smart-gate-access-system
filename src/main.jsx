@@ -1,6 +1,6 @@
 // src/main.jsx
 
-import React from 'react';
+import React, { useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -12,11 +12,15 @@ import Users from './pages/Users';
 import AccessLog from './pages/AccessLog';
 import GateControl from './pages/GateControl';
 import { MQTTProvider } from "./services/Connection";
+import WebcamComponent from './components/Webcam';
+
+const webcamRef = React.createRef();
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <MQTTProvider>
+    <WebcamComponent ref={webcamRef} className='hidden' />
+    <MQTTProvider webcamRef={webcamRef}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />}>

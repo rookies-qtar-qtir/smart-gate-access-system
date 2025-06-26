@@ -4,8 +4,9 @@ import { message as antdMessage } from "antd";
 import CONFIG from "./Config";
 import { MQTTContext } from "./MqttContext";
 import { userService, accessLogsApi } from "./api.js";
+import WebcamComponent from '../components/Webcam';
 
-export const MQTTProvider = ({ children }) => {
+export const MQTTProvider = ({ children, webcamRef  }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("Disconnected");
   const [lastStatusReceived, setLastStatusReceived] = useState(Date.now());
@@ -75,6 +76,7 @@ export const MQTTProvider = ({ children }) => {
           // Process RFID access when UID is received
           if (parsedPayload.uid) {
             processRFIDAccess(parsedPayload.uid);
+            
           }
         } catch (error) {
           console.error("Failed to parse RFID payload:", error);
@@ -198,14 +200,13 @@ export const MQTTProvider = ({ children }) => {
 
   const processRFIDAccess = async (uid) => {
     try {
-      const user = await userService.getUserByUid(uid);
-
-      if (user) {
+      const imageFile = webcamRef?.current?.captureImage?.();
+      const accessResult = await accessLogsApi.processRFIDAccess(uid, imageFile);
+      
+      if (accessResult.user) {
         console.log("User found:", user);
-        antdMessage.success(`Access granted for ${user.name}`);
-
-        const accessResult = await accessLogsApi.processRFIDAccess(uid);
         console.log("Access result:", accessResult);
+        antdMessage.success(`Access granted for ${user.name}`);
 
         if (accessResult.access) {
           const gateOpenPayload = JSON.stringify({
@@ -219,9 +220,6 @@ export const MQTTProvider = ({ children }) => {
       } else {
         console.log("User not found for UID:", uid);
         antdMessage.error("Access denied - UID not registered");
-
-        const accessResult = await accessLogsApi.processRFIDAccess(uid);
-        return accessResult;
       }
     } catch (error) {
       console.error("Error processing RFID access:", error);
