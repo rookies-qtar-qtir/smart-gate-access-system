@@ -69,10 +69,12 @@ void publishStatus() {
   DynamicJsonDocument root(200);
   JsonObject doc = root.to<JsonObject>();
   doc["online_status"] = client.connected();
-  doc["servo_status"] = perintah == '1' ? 1 : 0;
+  doc["servo"] = String(perintah);
   doc["auto_mode"] = autoMode;
-  doc["distance_threshold"] = detectionThreshold;
+  doc["ip"] = WiFi.localIP().toString();
+  doc["rssi"] = WiFi.RSSI();
   doc["distance"] = readDistance();
+  doc["threshold"] = detectionThreshold;
 
   char jsonBuffer[256];
   serializeJson(doc, jsonBuffer);
@@ -103,8 +105,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     if (!error) {
       // Check if this message contains commands for the device
-      if (doc.containsKey("servo_status")) {
-        int servoStatus = doc["servo_status"];
+      if (doc.containsKey("servo")) {
+        int servoStatus = doc["servo"];
         if (servoStatus == 1 && perintah != '1') {
           Serial.println("Memutar servo ke posisi 90 (membuka palang)");
           servoMotor.write(90);
@@ -128,8 +130,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
         publishStatus();
       }
 
-      if (doc.containsKey("distance_threshold")) {
-        int newThreshold = doc["distance_threshold"];
+      if (doc.containsKey("distance")) {
+        int newThreshold = doc["distance"];
         if (newThreshold > 0) {
           detectionThreshold = newThreshold;
           Serial.print("Threshold jarak diperbarui menjadi: ");
