@@ -10,6 +10,7 @@ const CONFIG = {
     topics: {
         statusTopic: import.meta.env.VITE_TOPIC_STATUS,
         rfidTopic: import.meta.env.VITE_TOPIC_RFID,
+        controlTopic: import.meta.env.VITE_TOPIC_CONTROL,
     },
 };
 

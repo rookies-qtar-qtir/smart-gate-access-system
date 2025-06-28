@@ -16,11 +16,15 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
   const heartbeatTimeout = 30000;
   const [deviceStatus, setDeviceStatus] = useState({
     online: false,
-    servo: null,
     auto_mode: true,
     ip: "",
     rssi: null,
     distance: null,
+    threshold: null,
+    servo: null,
+  });
+  const [controlPayload, setControlPayload] = useState({
+    servo: null,
     threshold: null,
   });
   const [mqttLogs, setMqttLogs] = useState([]);
@@ -80,6 +84,26 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
           }
         } catch (error) {
           console.error("Failed to parse RFID payload:", error);
+        }
+      }
+
+      if (topic === CONFIG.topics.controlTopic) {
+        try {
+          const parsedPayload = JSON.parse(payload);
+          if (parsedPayload.servo !== undefined) {
+            setDeviceStatus((prev) => ({
+              ...prev,
+              servo: parsedPayload.servo,
+            }));
+          }
+          if (parsedPayload.auto_mode !== undefined) {
+            setDeviceStatus((prev) => ({
+              ...prev,
+              auto_mode: parsedPayload.auto_mode,
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to parse control payload:", error);
         }
       }
 
@@ -151,7 +175,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
   };
 
   const sendMessage = (topic, payload) => {
-    if (clientRef.current && isConnected) {
+    if (clientRef.current && clientRef.current.isConnected()) {
       try {
         const mqttMessage = new Message(payload);
         mqttMessage.destinationName = topic;
@@ -201,26 +225,28 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
   const processRFIDAccess = async (uid) => {
     try {
       const imageFile = webcamRef?.current?.captureImage?.();
+
       const accessResult = await accessLogsApi.processRFIDAccess(uid, imageFile);
-      
-      if (accessResult.user) {
-        console.log("User found:", user);
-        console.log("Access result:", accessResult);
-        antdMessage.success(`Access granted for ${user.name}`);
+      console.log("Access result:", accessResult);
 
-        if (accessResult.access) {
-          const gateOpenPayload = JSON.stringify({
-            ...deviceStatus,
-            servo: "1",
-          });
-          sendMessage(CONFIG.topics.statusTopic, gateOpenPayload);
-        }
+      const user = await userService.getUserByUid(uid);
+      console.log("User found:", user);
 
-        return accessResult;
+      if (accessResult?.data?.access === true) {
+        const name = user ? user.name : uid;
+        antdMessage.success(`Access granted for ${name}`);
+
+        const gateOpenPayload = JSON.stringify({ 
+          ...controlPayload,
+          servo: "1" 
+        });
+        sendMessage(CONFIG.topics.controlTopic, gateOpenPayload);
       } else {
-        console.log("User not found for UID:", uid);
-        antdMessage.error("Access denied - UID not registered");
+        const name = user ? user.name : uid;
+        antdMessage.error(`Access denied for ${name}: ${accessResult.message}`);
       }
+
+      return accessResult;
     } catch (error) {
       console.error("Error processing RFID access:", error);
       antdMessage.error("Error processing RFID access");
@@ -267,6 +293,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
         lastStatusReceived,
         mqttLogs,
         rfidPayload,
+        controlPayload,
       }}
     >
       {children}

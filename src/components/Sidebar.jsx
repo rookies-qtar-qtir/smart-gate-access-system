@@ -7,6 +7,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import TestPublisher from "../test/PublishJson";
 import { useMQTT } from "../services/MqttContext";
 import RFIDTestPublisher from "../test/PublishRfid";
+import PublishControl from "../test/PublishControl";
 
 
 function Sidebar({ collapsed, setCollapsed }) {
@@ -81,6 +82,7 @@ function Sidebar({ collapsed, setCollapsed }) {
 
       <TestPublisher />
       <RFIDTestPublisher />
+      <PublishControl />
     </Layout.Sider>
   );
 }

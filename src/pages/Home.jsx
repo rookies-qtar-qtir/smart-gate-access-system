@@ -11,9 +11,11 @@ import {
 import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import StatusAlert from "../components/StatusAlert";
+import { useMQTT } from "../services/MqttContext";
 
 function Home() {
   const navigate = useNavigate();
+  const { deviceStatus } = useMQTT();
 
   return (
     <div className="">
@@ -49,7 +51,7 @@ function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatusCard
               label="Status Koneksi"
-              value="Mengecek..."
+              value= {deviceStatus.online ? "Tersambung" : "Tidak Tersambung"}
               icon={<FaSignal />}
               iconColor="text-green-500"
               borderColor="border-green-500"
@@ -57,7 +59,7 @@ function Home() {
             />
             <StatusCard
               label="Status Gerbang"
-              value="Mengecek..."
+              value={deviceStatus.servo === 1 ? "Terbuka" : "Tertutup"}
               icon={<FaDoorClosed />}
               iconColor="text-blue-500"
               borderColor="border-blue-500"
@@ -65,7 +67,7 @@ function Home() {
             />
             <StatusCard
               label="Sensor Jarak"
-              value="Mengecek..."
+              value= {deviceStatus.distance ? `${deviceStatus.distance} cm` : "- cm"}
               icon={<FaRuler />}
               iconColor="text-teal-500"
               borderColor="border-teal-500"
@@ -74,34 +76,11 @@ function Home() {
             />
             <StatusCard
               label="Ambang Batas Jarak"
-              value="- cm"
+              value= {deviceStatus.threshold ? `${deviceStatus.threshold} cm` : "- cm"}
               icon={<FaSlidersH />}
               iconColor="text-purple-500"
               borderColor="border-purple-500"
               id="distance-threshold-display"
-            />
-          </div>
-        </section>
-
-        {/* Ringkasan */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800 text-left">Ringkasan Aktivitas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatusCard
-              label="Akses Hari Ini"
-              value=""
-              icon={<FaChartLine />}
-              iconColor="text-amber-500"
-              borderColor="border-amber-500"
-              id="today-access"
-            />
-            <StatusCard
-              label="Update Terakhir"
-              value="-"
-              icon={<FaClock />}
-              iconColor="text-indigo-500"
-              borderColor="border-indigo-500"
-              id="last-update"
             />
           </div>
         </section>

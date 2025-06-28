@@ -9,14 +9,14 @@ import { useMQTT } from "../services/MqttContext";
 import CONFIG from "../services/Config";
 
 function GateControl() {
-	const { deviceStatus, sendMessage, mqttLogs } = useMQTT();
+	const { deviceStatus, sendMessage, mqttLogs, controlPayload } = useMQTT();
 
 	const handleGateControl = (servoStatus) => {
 		const statusPayload = JSON.stringify({
-			...deviceStatus,
+			// ...controlPayload,
 			servo: servoStatus,
 		});
-		sendMessage(CONFIG.topics.statusTopic, statusPayload);
+		sendMessage(CONFIG.topics.controlTopic, statusPayload);
 	};
 
 	const handleModeChange = (mode) => {
@@ -29,10 +29,10 @@ function GateControl() {
 
 	const handleThresholdChange = (threshold) => {
 		const statusPayload = JSON.stringify({
-			...deviceStatus,
+			// ...controlPayload,
 			threshold: threshold,
 		});
-		sendMessage(CONFIG.topics.statusTopic, statusPayload);
+		sendMessage(CONFIG.topics.controlTopic, statusPayload);
 	};
 
 	return (
@@ -52,12 +52,12 @@ function GateControl() {
 				</Col>
 			</Row>
 
-			{/* Webcam Section */}
+			{/* Webcam Section
 			<Row gutter={16} style={{ marginTop: "16px" }}>
 				<Col span={24}>
 					<WebcamComponent />
 				</Col>
-			</Row>
+			</Row> */}
 
 			<div style={{ marginTop: "16px" }}>
 				<GateStatusMonitor deviceStatus={deviceStatus} />

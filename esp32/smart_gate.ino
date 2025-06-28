@@ -68,7 +68,7 @@ long readDistance() {
 void publishStatus() {
   DynamicJsonDocument root(200);
   JsonObject doc = root.to<JsonObject>();
-  doc["online_status"] = client.connected();
+  doc["online"] = client.connected();
   doc["servo"] = String(perintah);
   doc["auto_mode"] = autoMode;
   doc["ip"] = WiFi.localIP().toString();
