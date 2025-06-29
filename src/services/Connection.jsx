@@ -4,7 +4,7 @@ import { message as antdMessage } from "antd";
 import CONFIG from "./Config";
 import { MQTTContext } from "./MqttContext";
 import { userService, accessLogsApi } from "./api.js";
-import WebcamComponent from '../components/Webcam';
+import Webcam from '../components/Webcam';
 
 export const MQTTProvider = ({ children, webcamRef  }) => {
   const [isConnected, setIsConnected] = useState(false);

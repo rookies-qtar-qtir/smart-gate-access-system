@@ -9,7 +9,6 @@ import { useMQTT } from "../services/MqttContext";
 import RFIDTestPublisher from "../test/PublishRfid";
 import PublishControl from "../test/PublishControl";
 
-
 function Sidebar({ collapsed, setCollapsed }) {
   const { isConnected, deviceStatus } = useMQTT();
 
@@ -53,36 +52,66 @@ function Sidebar({ collapsed, setCollapsed }) {
     <Layout.Sider
       collapsed={collapsed}
       trigger={null}
-      className="min-h-screen max-h-screen relative"
+      className="min-h-screen"
       width={200}
       collapsedWidth={80}
+      style={{
+        background: '#001529'
+      }}
     >
-      {/* Sidebar Content */}
-      <div className="items-center p-4">
-        {!collapsed && <Logo className="mr-2" />}
-        {collapsed && <div className="h-10 w10 py-10"></div>}
-      </div>
+      {/* Container untuk mengatur layout vertikal */}
+      <div className="flex flex-col h-full ">
 
-      {/* Menu */}
-      <div className="">
-        <Menu
-          selectedKeys={[activeMenuItem.key]}
-          mode="inline"
-          theme="dark"
-          inlineCollapsed={collapsed}
-          items={items}
-          className="sidebar-menu border-t border-gray-700 mt-6 space-y-1 bg-white"
-        />
-      </div>
+        {/* Header/Logo Section */}
+        <div className="h-16 flex items-center justify-center border-b border-gray-700 text-[0.3rem]">
+          <Logo collapsed={collapsed} />
+        </div>
 
-      <div className={`py-4 bg-gray-900 text-sm space-y-1 ${collapsed ? 'text-xs' : 'text-sm'}`}>
-        <div><span>Broker:</span> <span className={isConnected ? 'text-green-400' : 'text-red-400'}>{isConnected ? 'Connected' : 'Disconnected'}</span></div>
-        <div><span>Device:</span> <span className={deviceStatus.online == true ? 'text-green-400' : 'text-red-400'}>{deviceStatus.online == true ? 'Connected' : 'Disconnected'}</span></div>
-      </div>
 
-      <TestPublisher />
-      <RFIDTestPublisher />
-      <PublishControl />
+
+        {/* Menu Section - Flex grow untuk mengambil space yang tersisa */}
+        <div className="flex-1 overflow-y-auto">
+          <Menu
+            selectedKeys={[activeMenuItem.key]}
+            mode="inline"
+            theme="dark"
+            inlineCollapsed={collapsed}
+            items={items}
+            className="h-full border-none"
+            style={{
+              background: 'transparent',
+              borderRight: 'none'
+            }}
+          />
+        </div>
+
+        {/* Status Section - Fixed di bottom */}
+        <div className="border-t border-gray-700 bg-gray-800">
+          <div className={`p-3 text-xs space-y-2 ${collapsed ? 'text-center' : ''}`}>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">Broker:</span>
+              <span className={isConnected ? 'text-green-400' : 'text-red-400'}>
+                {collapsed ? (isConnected ? '●' : '●') : (isConnected ? 'Connected' : 'Disconnected')}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">Device:</span>
+              <span className={deviceStatus.online ? 'text-green-400' : 'text-red-400'}>
+                {collapsed ? (deviceStatus.online ? '●' : '●') : (deviceStatus.online ? 'Connected' : 'Disconnected')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Test Components - Hanya tampil dalam development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="border-t border-gray-700 p-2 space-y-1">
+            <TestPublisher />
+            <RFIDTestPublisher />
+            <PublishControl />
+          </div>
+        )}
+      </div>
     </Layout.Sider>
   );
 }

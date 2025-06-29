@@ -19,11 +19,11 @@ const App = () => {
         <Content className="overflow-y-auto">
           <Outlet key={location.pathname} />
         </Content>
-        <Footer className="bg-white p-4 shadow-inner">
+        {/* <Footer className="bg-white p-4 shadow-inner">
           <div className="text-center text-gray-500 text-sm">
             &copy; 2025 Smart Gate Access System - All Rights Reserved
           </div>
-        </Footer>
+        </Footer> */}
       </Layout>
     </Layout>
   );

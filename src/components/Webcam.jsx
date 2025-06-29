@@ -1,18 +1,27 @@
-import React, { useEffect, useImperativeHandle, forwardRef, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  useRef,
+  useState,
+} from "react";
 import Webcam from "react-webcam";
 import { Card, Select, Button, message } from "antd";
 
 const { Option } = Select;
 
-const WebcamComponent = forwardRef((props, ref) => {
+const Webcam = forwardRef((props, ref) => {
   const webcamInnerRef = useRef(null);
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
-  const [capturedImage, setCapturedImage] = useState(null); // 👈 state untuk image
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [visible, setVisible] = useState(true);
 
   const getVideoDevices = async () => {
     const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = mediaDevices.filter(device => device.kind === 'videoinput');
+    const videoDevices = mediaDevices.filter(
+      (device) => device.kind === "videoinput"
+    );
     setDevices(videoDevices);
 
     if (videoDevices.length > 0 && !selectedDeviceId) {
@@ -21,15 +30,16 @@ const WebcamComponent = forwardRef((props, ref) => {
   };
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true })
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
       .then(() => getVideoDevices())
       .catch(() => message.error("Gagal mengakses kamera"));
   }, []);
 
   const videoConstraints = {
-    width: 640,
-    height: 480,
-    deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined
+    width: 320,
+    height: 240,
+    deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
   };
 
   const imageSrcToBlob = (dataURL) => {
@@ -50,47 +60,71 @@ const WebcamComponent = forwardRef((props, ref) => {
       const url = URL.createObjectURL(blob);
       setCapturedImage(url);
 
-      // Trigger download
       const a = document.createElement("a");
       a.href = url;
       a.download = `capture_${Date.now()}.jpg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url); // optional: cleanup
+      URL.revokeObjectURL(url);
     } else {
       message.error("Gagal menangkap gambar");
     }
   };
 
-  // 👇 Expose captureImage to parent via ref
   useImperativeHandle(ref, () => ({
     captureImage: () => {
       const imageSrc = webcamInnerRef.current.getScreenshot();
       return imageSrcToBlob(imageSrc);
-    }
+    },
+    toggle: () => {
+      setVisible((prev) => !prev);
+    },
   }));
 
+  if (!visible) return null;
+
   return (
-    <Card title="Live Camera Feed">
-      <Select value={selectedDeviceId} onChange={setSelectedDeviceId} style={{ marginBottom: 10 }}>
-        {devices.map((device, i) => (
-          <Option key={device.deviceId} value={device.deviceId}>
-            {device.label || `Camera ${i + 1}`}
-          </Option>
-        ))}
-      </Select>
-      <Webcam
-        ref={webcamInnerRef}
-        audio={false}
-        screenshotFormat="image/jpeg"
-        videoConstraints={videoConstraints}
-      />
-      <div style={{ marginTop: 10 }}>
-        <Button type="primary" onClick={captureImage}>Capture & Download</Button>
-      </div>
-    </Card>
+    <div
+      style={{
+        position: "fixed",
+        bottom: "20px",
+        right: "80px",
+        zIndex: 1000,
+        width: 360,
+      }}
+    >
+      <Card title="Live Camera" size="small" bodyStyle={{ padding: 10 }}>
+        <Select
+          value={selectedDeviceId}
+          onChange={setSelectedDeviceId}
+          style={{ marginBottom: 8, width: "100%" }}
+        >
+          {devices.map((device, i) => (
+            <Option key={device.deviceId} value={device.deviceId}>
+              {device.label || `Camera ${i + 1}`}
+            </Option>
+          ))}
+        </Select>
+        <Webcam
+          ref={webcamInnerRef}
+          audio={false}
+          screenshotFormat="image/jpeg"
+          videoConstraints={videoConstraints}
+          style={{ width: "100%", borderRadius: 8 }}
+        />
+        <Button
+          type="primary"
+          block
+          size="small"
+          onClick={captureImage}
+          style={{ marginTop: 8 }}
+        >
+          Capture & Download
+        </Button>
+      </Card>
+    </div>
   );
 });
 
-export default WebcamComponent;
+export default Webcam;

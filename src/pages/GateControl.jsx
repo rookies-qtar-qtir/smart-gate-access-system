@@ -3,7 +3,6 @@ import GateControlButtons from "../components/GateControlButtons";
 import GateConfiguration from "../components/GateConfiguration";
 import GateStatusMonitor from "../components/GateStatusMonitor";
 import ActivityLog from "../components/ActivityLog";
-import WebcamComponent from "../components/Webcam";
 import { Col, Row } from "antd";
 import { useMQTT } from "../services/MqttContext";
 import CONFIG from "../services/Config";
@@ -51,13 +50,6 @@ function GateControl() {
 					/>
 				</Col>
 			</Row>
-
-			{/* Webcam Section
-			<Row gutter={16} style={{ marginTop: "16px" }}>
-				<Col span={24}>
-					<WebcamComponent />
-				</Col>
-			</Row> */}
 
 			<div style={{ marginTop: "16px" }}>
 				<GateStatusMonitor deviceStatus={deviceStatus} />

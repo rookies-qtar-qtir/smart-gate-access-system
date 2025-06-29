@@ -1,5 +1,3 @@
-// src/main.jsx
-
 import React, { useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -12,14 +10,14 @@ import Users from './pages/Users';
 import AccessLog from './pages/AccessLog';
 import GateControl from './pages/GateControl';
 import { MQTTProvider } from "./services/Connection";
-import WebcamComponent from './components/Webcam';
+import Webcam from './components/Webcam';
+import FloatingWebcamButton from './components/FloatingWebcamButton';
+import Webcam from './components/Webcam';
 
 const webcamRef = React.createRef();
 
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <WebcamComponent ref={webcamRef} className='hidden' />
     <MQTTProvider webcamRef={webcamRef}>
       <BrowserRouter>
         <Routes>
@@ -30,6 +28,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="gate-control" element={<GateControl />} />
           </Route>
         </Routes>
+        
+        {/* Floating Webcam */}
+        <Webcam ref={webcamRef} />
+        <FloatingWebcamButton webcamRef={webcamRef} />
       </BrowserRouter>
     </MQTTProvider>
   </React.StrictMode>
