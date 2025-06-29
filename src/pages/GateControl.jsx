@@ -51,7 +51,7 @@ function GateControl() {
 				</Col>
 			</Row>
 
-			<div style={{ marginTop: "16px" }}>
+			<div style={{ marginTop: "32px" }}>
 				<GateStatusMonitor deviceStatus={deviceStatus} />
 			</div>
 

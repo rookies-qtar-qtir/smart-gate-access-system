@@ -1,3 +1,5 @@
+// src/main.jsx
+
 import React, { useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -12,7 +14,7 @@ import GateControl from './pages/GateControl';
 import { MQTTProvider } from "./services/Connection";
 import Webcam from './components/Webcam';
 import FloatingWebcamButton from './components/FloatingWebcamButton';
-import Webcam from './components/Webcam';
+import WebcamComponent from './components/Webcam';
 
 const webcamRef = React.createRef();
 
@@ -29,8 +31,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           </Route>
         </Routes>
         
-        {/* Floating Webcam */}
-        <Webcam ref={webcamRef} />
+        {/* Floating Webcam - Available on all pages */}
+        <WebcamComponent ref={webcamRef} />
         <FloatingWebcamButton webcamRef={webcamRef} />
       </BrowserRouter>
     </MQTTProvider>

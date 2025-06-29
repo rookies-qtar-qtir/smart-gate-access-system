@@ -10,12 +10,12 @@ import { Card, Select, Button, message } from "antd";
 
 const { Option } = Select;
 
-const Webcam = forwardRef((props, ref) => {
+const WebcamComponent = forwardRef((props, ref) => {
   const webcamInnerRef = useRef(null);
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [capturedImage, setCapturedImage] = useState(null);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(true); // 👈 untuk toggle tampilan
 
   const getVideoDevices = async () => {
     const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -127,4 +127,4 @@ const Webcam = forwardRef((props, ref) => {
   );
 });
 
-export default Webcam;
+export default WebcamComponent;
