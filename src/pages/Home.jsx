@@ -7,7 +7,9 @@ import {
   FaSlidersH,
   FaChartLine,
   FaClock,
+  FaWifi
 } from 'react-icons/fa';
+import { MdSignalWifiOff } from 'react-icons/md';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import StatusAlert from "../components/StatusAlert";
@@ -51,10 +53,10 @@ function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatusCard
               label="Status Koneksi"
-              value= {deviceStatus.online ? "Tersambung" : "Tidak Tersambung"}
-              icon={<FaSignal />}
-              iconColor="text-green-500"
-              borderColor="border-green-500"
+              value={deviceStatus.online ? "Tersambung" : "Tidak Tersambung"}
+              icon={deviceStatus.online ? <FaWifi /> : <MdSignalWifiOff />}
+              iconColor={deviceStatus.online ? "text-green-500" : "text-red-500"}
+              borderColor={deviceStatus.online ? "border-green-500" : "border-red-500"}
               id="connection-status"
             />
             <StatusCard
@@ -67,7 +69,7 @@ function Home() {
             />
             <StatusCard
               label="Sensor Jarak"
-              value= {deviceStatus.distance ? `${deviceStatus.distance} cm` : "- cm"}
+              value={deviceStatus.distance ? `${deviceStatus.distance} cm` : "- cm"}
               icon={<FaRuler />}
               iconColor="text-teal-500"
               borderColor="border-teal-500"
@@ -76,7 +78,7 @@ function Home() {
             />
             <StatusCard
               label="Ambang Batas Jarak"
-              value= {deviceStatus.threshold ? `${deviceStatus.threshold} cm` : "- cm"}
+              value={deviceStatus.threshold ? `${deviceStatus.threshold} cm` : "- cm"}
               icon={<FaSlidersH />}
               iconColor="text-purple-500"
               borderColor="border-purple-500"

@@ -87,25 +87,15 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
         }
       }
 
-      if (topic === CONFIG.topics.controlTopic) {
-        try {
-          const parsedPayload = JSON.parse(payload);
-          if (parsedPayload.servo !== undefined) {
-            setDeviceStatus((prev) => ({
-              ...prev,
-              servo: parsedPayload.servo,
-            }));
-          }
-          if (parsedPayload.auto_mode !== undefined) {
-            setDeviceStatus((prev) => ({
-              ...prev,
-              auto_mode: parsedPayload.auto_mode,
-            }));
-          }
-        } catch (error) {
-          console.error("Failed to parse control payload:", error);
-        }
-      }
+      // // Development purpose: log control topic messages
+      // if (topic === CONFIG.topics.controlTopic) {
+      //   try {
+      //     const parsedPayload = JSON.parse(payload);
+      //     console.log("Control payload received:", parsedPayload);
+      //   } catch (error) {
+      //     console.error("Failed to parse control payload:", error);
+      //   }
+      // }
 
       const logEntry = {
         time: now,
@@ -240,7 +230,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
           ...controlPayload,
           servo: "1" 
         });
-        sendMessage(CONFIG.topics.controlTopic, gateOpenPayload);
+        sendMessage(CONFIG.topicPub.controlTopic, gateOpenPayload);
       } else {
         const name = user ? user.name : uid;
         antdMessage.error(`Access denied for ${name}: ${accessResult.message}`);

@@ -8,6 +8,7 @@ const API_CONFIG = {
   },
   HEADERS: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
   },
 };
 

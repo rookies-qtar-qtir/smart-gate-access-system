@@ -11,27 +11,27 @@ function GateControl() {
 	const { deviceStatus, sendMessage, mqttLogs, controlPayload } = useMQTT();
 
 	const handleGateControl = (servoStatus) => {
-		const statusPayload = JSON.stringify({
+		const controlPayload = JSON.stringify({
 			// ...controlPayload,
 			servo: servoStatus,
 		});
-		sendMessage(CONFIG.topics.controlTopic, statusPayload);
+		sendMessage(CONFIG.topicPub.controlTopic, controlPayload);
 	};
 
 	const handleModeChange = (mode) => {
-		const statusPayload = JSON.stringify({
+		const controlPayload = JSON.stringify({
 			...deviceStatus,
 			auto_mode: mode,
 		});
-		sendMessage(CONFIG.topics.statusTopic, statusPayload);
+		sendMessage(CONFIG.topics.controlTopic, controlPayload);
 	};
 
 	const handleThresholdChange = (threshold) => {
-		const statusPayload = JSON.stringify({
+		const controlPayload = JSON.stringify({
 			// ...controlPayload,
 			threshold: threshold,
 		});
-		sendMessage(CONFIG.topics.controlTopic, statusPayload);
+		sendMessage(CONFIG.topicPub.controlTopic, controlPayload);
 	};
 
 	return (
