@@ -1,5 +1,4 @@
 // src/main.jsx
-
 import React, { useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -11,8 +10,10 @@ import Home from './pages/Home';
 import Users from './pages/Users';
 import AccessLog from './pages/AccessLog';
 import GateControl from './pages/GateControl';
+import Login from './pages/Login';
 import { MQTTProvider } from "./services/Connection";
-import Webcam from './components/Webcam';
+import { AuthProvider } from './services/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import FloatingWebcamButton from './components/FloatingWebcamButton';
 import WebcamComponent from './components/Webcam';
 
@@ -20,21 +21,28 @@ const webcamRef = React.createRef();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <MQTTProvider webcamRef={webcamRef}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={<Home />} />
-            <Route path="users" element={<Users />} />
-            <Route path="access-log" element={<AccessLog />} />
-            <Route path="gate-control" element={<GateControl />} />
-          </Route>
-        </Routes>
-        
-        {/* Floating Webcam - Available on all pages */}
-        <WebcamComponent ref={webcamRef} />
-        <FloatingWebcamButton webcamRef={webcamRef} />
-      </BrowserRouter>
-    </MQTTProvider>
+    <AuthProvider>
+      <MQTTProvider webcamRef={webcamRef}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <App />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Home />} />
+              <Route path="users" element={<Users />} />
+              <Route path="access-log" element={<AccessLog />} />
+              <Route path="gate-control" element={<GateControl />} />
+            </Route>
+          </Routes>
+          
+          {/* Floating Webcam */}
+          <WebcamComponent ref={webcamRef} />
+          <FloatingWebcamButton webcamRef={webcamRef} />
+        </BrowserRouter>
+      </MQTTProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

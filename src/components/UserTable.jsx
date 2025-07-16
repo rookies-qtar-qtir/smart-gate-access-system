@@ -75,6 +75,16 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 			),
 		},
 		{
+			title: "Role",
+			dataIndex: "role",
+			key: "role",
+			render: (text) => (
+				<span className="font-medium">
+					{text.charAt(0).toUpperCase() + text.slice(1)}
+				</span>
+			),
+		},
+		{
 			title: "Actions",
 			key: "actions",
 			width: 150,

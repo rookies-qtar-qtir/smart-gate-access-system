@@ -1,22 +1,27 @@
-// component/Sidebar.jsx
-
+// src/components/Sidebar.jsx
 import Logo from "./Logo";
-import { Menu, Layout } from 'antd';
-import { HomeOutlined, ControlOutlined, HistoryOutlined, UserOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import TestPublisher from "../test/PublishJson";
+import { Menu, Layout, Button } from 'antd';
+import { HomeOutlined, ControlOutlined, HistoryOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../services/AuthContext';
 import { useMQTT } from "../services/MqttContext";
+import TestPublisher from "../test/PublishJson";
 import RFIDTestPublisher from "../test/PublishRfid";
 import PublishControl from "../test/PublishControl";
 
 function Sidebar({ collapsed, setCollapsed }) {
   const { isConnected, deviceStatus } = useMQTT();
-
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const items = [
@@ -60,14 +65,12 @@ function Sidebar({ collapsed, setCollapsed }) {
       }}
     >
       {/* Container untuk mengatur layout vertikal */}
-      <div className="flex flex-col h-full ">
+      <div className="flex flex-col h-full">
 
         {/* Header/Logo Section */}
         <div className="h-16 flex items-center justify-center border-b border-gray-700 text-[0.3rem]">
           <Logo collapsed={collapsed} />
         </div>
-
-
 
         {/* Menu Section - Flex grow untuk mengambil space yang tersisa */}
         <div className="flex-1 overflow-y-auto">
@@ -82,8 +85,46 @@ function Sidebar({ collapsed, setCollapsed }) {
               background: 'transparent',
               borderRight: 'none'
             }}
-          />
+            />
         </div>
+
+        {/* Test Components - Hanya tampil dalam development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="border-t border-gray-700 p-2 space-y-1">
+            <TestPublisher />
+            <RFIDTestPublisher />
+            <PublishControl />
+          </div>
+        )}
+        
+        {/* User Profile Section */}
+        {user && (
+          <div className="border-t border-gray-700 bg-gray-800 p-3">
+            <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
+              {/* User Info */}
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <div className="text-white text-sm font-medium truncate">
+                    {user.name}
+                  </div>
+                  <div className="text-gray-400 text-xs truncate">
+                    {user.role}
+                  </div>
+                </div>
+              )}
+              
+              {/* Logout Button */}
+              <Button 
+                type="text" 
+                size="small" 
+                onClick={handleLogout}
+                className="text-gray-400 hover:text-white hover:bg-gray-700 flex items-center justify-center"
+                icon={<span className="text-red-500"><LogoutOutlined /></span>}
+                title="Logout"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Status Section - Fixed di bottom */}
         <div className="border-t border-gray-700 bg-gray-800">
@@ -103,14 +144,6 @@ function Sidebar({ collapsed, setCollapsed }) {
           </div>
         </div>
 
-        {/* Test Components - Hanya tampil dalam development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="border-t border-gray-700 p-2 space-y-1">
-            <TestPublisher />
-            <RFIDTestPublisher />
-            <PublishControl />
-          </div>
-        )}
       </div>
     </Layout.Sider>
   );

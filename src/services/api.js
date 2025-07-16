@@ -5,6 +5,7 @@ const API_CONFIG = {
   ENDPOINTS: {
     USERS: '/users',
     ACCESS_LOGS: '/access-logs',
+    AUTH: '/auth',
   },
   HEADERS: {
     'Content-Type': 'application/json',
@@ -17,8 +18,13 @@ const api = axios.create({
   headers: API_CONFIG.HEADERS,
 });
 
+// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
@@ -28,6 +34,7 @@ api.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => {
     console.log(`API Response: ${response.status} ${response.config.url}`);
@@ -35,10 +42,55 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('API Response Error:', error.response?.data || error.message);
+    
+    // PERBAIKAN: Jangan redirect otomatis untuk endpoint login
+    if (error.response?.status === 401) {
+      // Cek apakah ini request ke endpoint login
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      
+      if (!isLoginRequest) {
+        // Hanya redirect jika bukan login request
+        localStorage.removeItem('access_token');
+        window.location.href = '/login';
+      }
+      // Jika login request, biarkan error di-handle oleh komponen
+    }
+    
     return Promise.reject(error);
   }
 );
 
+// Auth Service
+export const authService = {
+  login: async (email, password) => {
+    try {
+      const response = await api.post(`${API_CONFIG.ENDPOINTS.AUTH}/login`, {
+        email,
+        password
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error; // Throw error biar bisa di-handle di AuthContext
+    }
+  },
+
+  getProfile: async () => {
+    try {
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.AUTH}/profile`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Get profile error:', error);
+      throw error;
+    }
+  },
+
+  logout: () => {
+    localStorage.removeItem('access_token');
+  }
+};
+
+// User Service
 export const userService = {
   getUsers: async () => {
     try {
@@ -114,7 +166,7 @@ export const userService = {
   },
 };
 
-
+// Access Logs Service
 export const accessLogsApi = {
   async getAll() {
     try {
@@ -189,9 +241,6 @@ export const accessLogsApi = {
       );
   
       return response.data;
-
-      // const response = await api.post(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/process`, { uid });
-      // return response.data;
     } catch (error) {
       console.error('Error processing RFID access:', error);
       return {

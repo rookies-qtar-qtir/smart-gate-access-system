@@ -23,7 +23,7 @@ function GateControl() {
 			...deviceStatus,
 			auto_mode: mode,
 		});
-		sendMessage(CONFIG.topics.controlTopic, controlPayload);
+		sendMessage(CONFIG.topicPub.controlTopic, controlPayload);
 	};
 
 	const handleThresholdChange = (threshold) => {

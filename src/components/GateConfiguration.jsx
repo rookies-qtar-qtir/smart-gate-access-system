@@ -13,7 +13,7 @@ function GateConfiguration({ deviceStatus, onModeChange, onThresholdChange }) {
 		setTimeout(() => setIsUpdating(false), 500);
 	};
 
-	const isAutoMode = deviceStatus.auto_mode !== "manual";
+	const isAutoMode = deviceStatus.auto_mode !== false;
 
 	return (
 		<div className="bg-white shadow-md p-6 rounded-xl mt-4 h-full border border-gray-100">
@@ -97,7 +97,7 @@ function GateConfiguration({ deviceStatus, onModeChange, onThresholdChange }) {
 								size="small"
 								checked={isAutoMode}
 								onChange={(checked) => {
-									const value = checked ? "auto" : "manual";
+									const value = checked ? "auto" : false;
 									onModeChange(value);
 								}}
 							/>

@@ -52,7 +52,7 @@ function Home() {
           <h2 className="text-2xl font-bold mb-4 text-gray-800 text-left">Status Sistem</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatusCard
-              label="Status Koneksi"
+              label="Status Device"
               value={deviceStatus.online ? "Tersambung" : "Tidak Tersambung"}
               icon={deviceStatus.online ? <FaWifi /> : <MdSignalWifiOff />}
               iconColor={deviceStatus.online ? "text-green-500" : "text-red-500"}
