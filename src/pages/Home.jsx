@@ -1,91 +1,57 @@
-import StatusCard from "../components/StatusCard";
+import React from 'react';
 import {
-  FaDoorOpen,
-  FaSignal,
-  FaDoorClosed,
-  FaRuler,
-  FaSlidersH,
-  FaChartLine,
-  FaClock,
-  FaWifi
-} from 'react-icons/fa';
-import { MdSignalWifiOff } from 'react-icons/md';
-import { Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+  Filler
+} from 'chart.js';
 import StatusAlert from "../components/StatusAlert";
 import { useMQTT } from "../services/MqttContext";
+import { useAccessLog } from '../services/AccessLogContext';
+import HeroBanner from '../components/HeroBanner';
+import SystemStatus from '../components/SystemStatus';
+import AccessStatistics from '../components/AccessStatistics';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+  Filler
+);
 
 function Home() {
-  const navigate = useNavigate();
   const { deviceStatus } = useMQTT();
+  const { stats, loading, accessLogs, initialized } = useAccessLog();
 
   return (
     <div className="">
-      {/* Hero Banner */}
-      <div
-        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">
-            Smart Gate Access System
-          </h1>
-          <p className="text-xl opacity-90 mb-6">
-            Solusi modern untuk pengelolaan akses gerbang dengan
-            teknologi IoT
-          </p>
-          <Button
-            color="primary"
-            variant="filled"
-            icon={<FaDoorOpen />}
-            size='large'
-            onClick={() => navigate('/gate-control')}
-            className="px-12! py-8! bg-white text-blue-600! rounded-lg font-medium hover:bg-gray-100! transition-colors! shadow-lg! border-none!"
-          >Akses Kontrol Panel</Button>
-        </div>
-      </div>
-
+      <HeroBanner />
+      
       <div className="p-6">
-        {/* <StatusAlert /> */}
-        <StatusAlert></StatusAlert>
-
+        <StatusAlert />
+        
         {/* Status Sistem */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800 text-left">Status Sistem</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <StatusCard
-              label="Status Device"
-              value={deviceStatus.online ? "Tersambung" : "Tidak Tersambung"}
-              icon={deviceStatus.online ? <FaWifi /> : <MdSignalWifiOff />}
-              iconColor={deviceStatus.online ? "text-green-500" : "text-red-500"}
-              borderColor={deviceStatus.online ? "border-green-500" : "border-red-500"}
-              id="connection-status"
-            />
-            <StatusCard
-              label="Status Gerbang"
-              value={deviceStatus.servo === 1 ? "Terbuka" : "Tertutup"}
-              icon={<FaDoorClosed />}
-              iconColor="text-blue-500"
-              borderColor="border-blue-500"
-              id="gate-status"
-            />
-            <StatusCard
-              label="Sensor Jarak"
-              value={deviceStatus.distance ? `${deviceStatus.distance} cm` : "- cm"}
-              icon={<FaRuler />}
-              iconColor="text-teal-500"
-              borderColor="border-teal-500"
-              id="distance-reading"
-              progress={{ width: '0%', color: 'bg-teal-500' }}
-            />
-            <StatusCard
-              label="Ambang Batas Jarak"
-              value={deviceStatus.threshold ? `${deviceStatus.threshold} cm` : "- cm"}
-              icon={<FaSlidersH />}
-              iconColor="text-purple-500"
-              borderColor="border-purple-500"
-              id="distance-threshold-display"
-            />
-          </div>
-        </section>
+        <SystemStatus deviceStatus={deviceStatus} />
+
+        {/* Statistik Akses */}
+        <AccessStatistics 
+          stats={stats} 
+          loading={loading} 
+          accessLogs={accessLogs} 
+        />
       </div>
     </div>
   );

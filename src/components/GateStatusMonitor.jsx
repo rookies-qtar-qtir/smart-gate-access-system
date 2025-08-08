@@ -4,7 +4,7 @@ import DistanceBar from "./DistanceBar";
 
 function GateStatusMonitor({ deviceStatus }) {
 	const [isAnimating, setIsAnimating] = useState(false);
-	const isOpen = deviceStatus?.servo === "1";
+	const isOpen = deviceStatus?.servo === 1;
 
 	useEffect(() => {
 		setIsAnimating(true);

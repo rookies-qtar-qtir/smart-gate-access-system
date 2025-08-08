@@ -123,6 +123,48 @@ function UserFormModal({
 				</Form.Item>
 
 				<Form.Item
+					label="Plate Number"
+					required
+				>
+					<Form.List name="plateNumber" rules={[
+						{
+							validator: async (_, names) => {
+								if (!names || names.length < 1) {
+									return Promise.reject(new Error('Please input at least one plate number!'));
+								}
+							},
+						},
+					]}>
+						{(fields, { add, remove }) => (
+							<>
+								{fields.map(({ key, name, ...restField }) => (
+									<Form.Item
+										key={key}
+										required
+										{...restField}
+										name={name}
+										rules={[{ required: true, message: 'Please input the plate number!' }]}
+									>
+										<Input
+											placeholder="Enter plate number"
+											size="large"
+											addonAfter={
+												fields.length > 1 ? (
+													<a onClick={() => remove(name)} style={{ color: 'red' }}>Remove</a>
+												) : null
+											}
+										/>
+									</Form.Item>
+								))}
+								<Form.Item>
+									<a onClick={() => add()}>+ Add Plate Number</a>
+								</Form.Item>
+							</>
+						)}
+					</Form.List>
+				</Form.Item>
+
+				<Form.Item
 					label="Status"
 					name="isActive"
 					valuePropName="checked">

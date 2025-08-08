@@ -35,6 +35,17 @@ function AccessLogTable({ logs, loading }) {
 			),
 		},
 		{
+			title: "Plate Number",
+			dataIndex: "plateNumber",
+			key: "plateNumber",
+			width: 150,
+			render: (plateNumber) => (
+				<span className="font-medium">
+					{plateNumber || <span className="text-gray-400">Unknown</span>}
+				</span>
+			),
+		},
+		{
 			title: "UID",
 			dataIndex: "uid",
 			key: "uid",

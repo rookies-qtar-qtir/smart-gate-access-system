@@ -15,7 +15,7 @@ const WebcamComponent = forwardRef((props, ref) => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [capturedImage, setCapturedImage] = useState(null);
-  const [visible, setVisible] = useState(true); // 👈 untuk toggle tampilan
+  const [visible, setVisible] = useState(true);
 
   const getVideoDevices = async () => {
     const mediaDevices = await navigator.mediaDevices.enumerateDevices();

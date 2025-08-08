@@ -1,59 +1,48 @@
 import { useState, useEffect } from 'react';
 import { message } from 'antd';
-import dayjs from 'dayjs'; // pastikan kamu sudah import dayjs
+import dayjs from 'dayjs';
 import StatusAlert from "../components/StatusAlert";
 import AccessLogStats from "../components/AccessLogStats";
 import AccessLogFilters from "../components/AccessLogFilters";
 import AccessLogTable from "../components/AccessLogTable";
-import { accessLogsApi } from '../services/api';
-import { useMQTT } from '../services/MqttContext';
+import { useAccessLog } from '../services/AccessLogContext';
 
 function AccessLog() {
-  const [accessLogs, setAccessLogs] = useState([]);
+  const { accessLogs: globalAccessLogs, stats: globalStats, loading: globalLoading, refreshData } = useAccessLog();
+
   const [filteredLogs, setFilteredLogs] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchUid, setSearchUid] = useState('');
   const [dateRange, setDateRange] = useState(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    granted: 0,
-    denied: 0,
-  });
 
   useEffect(() => {
-    fetchAccessLogs();
+    refreshData();
   }, []);
 
   useEffect(() => {
     applyFilters();
-  }, [accessLogs, filterStatus, searchUid, dateRange]);
+  }, [globalAccessLogs, filterStatus, searchUid, dateRange]);
 
-  const fetchAccessLogs = async () => {
-    setLoading(true);
-    try {
-      const logs = await accessLogsApi.getAll();
-      setAccessLogs(logs);
-      calculateStats(logs);
-    } catch (error) {
-      message.error('Failed to fetch access logs: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const handleRFIDProcessComplete = async (event) => {
+      console.log('RFID processing completed, refreshing access logs...', event.detail);
+      try {
+        await refreshData();
+        // message.success(`UID: ${event.detail.uid} processed successfully`);
+      } catch (error) {
+        console.error('Failed to refresh access logs after RFID processing:', error);
+      }
+    };
 
-  const calculateStats = (logs) => {
-    const granted = logs.filter(log => log.status === 'GRANTED').length;
-    const denied = logs.filter(log => log.status === 'DENIED').length;
-    setStats({
-      total: logs.length,
-      granted,
-      denied,
-    });
-  };
+    window.addEventListener('rfidProcessComplete', handleRFIDProcessComplete);
+
+    return () => {
+      window.removeEventListener('rfidProcessComplete', handleRFIDProcessComplete);
+    };
+  }, [refreshData]);
 
   const applyFilters = () => {
-    let filtered = [...accessLogs];
+    let filtered = [...globalAccessLogs];
 
     if (filterStatus !== 'all') {
       filtered = filtered.filter(log => log.status === filterStatus);
@@ -76,45 +65,20 @@ function AccessLog() {
     setFilteredLogs(filtered);
   };
 
-  const handleStatusFilter = async (value) => {
+  const handleStatusFilter = (value) => {
     setFilterStatus(value);
-    if (value === 'GRANTED') {
-      setLoading(true);
-      try {
-        const logs = await accessLogsApi.getGranted();
-        setAccessLogs(logs);
-      } catch (error) {
-        message.error('Failed to fetch granted logs');
-      } finally {
-        setLoading(false);
-      }
-    } else if (value === 'DENIED') {
-      setLoading(true);
-      try {
-        const logs = await accessLogsApi.getDenied();
-        setAccessLogs(logs);
-      } catch (error) {
-        message.error('Failed to fetch denied logs');
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      fetchAccessLogs();
-    }
   };
 
-  const handleDateRangeFilter = async (dates) => {
+  const handleDateRangeFilter = (dates) => {
     setDateRange(dates);
-    if (dates && dates.length === 2) {
-      setLoading(true);
-      try {
-        const logs = await accessLogsApi.getByDateRange(dates[0].toDate(), dates[1].toDate());
-        setAccessLogs(logs);
-      } catch (error) {
-        message.error('Failed to fetch logs by date range');
-      } finally {
-        setLoading(false);
-      }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      await refreshData();
+      message.success('Data refreshed successfully');
+    } catch (error) {
+      message.error('Failed to refresh data');
     }
   };
 
@@ -123,24 +87,28 @@ function AccessLog() {
       <StatusAlert />
 
       {/* Stats Section */}
-      <AccessLogStats stats={stats} />
+      <div className="mb-3">
+        <AccessLogStats stats={globalStats} />
+      </div>
 
       {/* Filters Section */}
-      <AccessLogFilters
-        searchUid={searchUid}
-        setSearchUid={setSearchUid}
-        filterStatus={filterStatus}
-        onStatusFilter={handleStatusFilter}
-        dateRange={dateRange}
-        onDateRangeFilter={handleDateRangeFilter}
-        onRefresh={fetchAccessLogs}
-        loading={loading}
-      />
+      <div className="my-3">
+        <AccessLogFilters
+          searchUid={searchUid}
+          setSearchUid={setSearchUid}
+          filterStatus={filterStatus}
+          onStatusFilter={handleStatusFilter}
+          dateRange={dateRange}
+          onDateRangeFilter={handleDateRangeFilter}
+          onRefresh={handleRefresh}
+          loading={globalLoading}
+        />
+      </div>
 
       {/* Logs Table Section */}
-      <AccessLogTable 
-        logs={filteredLogs} 
-        loading={loading} 
+      <AccessLogTable
+        logs={filteredLogs}
+        loading={globalLoading}
       />
     </div>
   );

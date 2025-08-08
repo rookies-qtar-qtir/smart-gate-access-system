@@ -77,7 +77,8 @@ function Users() {
 				uid: values.uid,
 				name: values.name,
 				email: values.email,
-				isActive: values.isActive !== undefined ? values.isActive : true
+				isActive: values.isActive !== undefined ? values.isActive : true,
+				plateNumber: values.plateNumber || []
 			};
 
 			console.log("Sending userData:", userData);
@@ -141,11 +142,15 @@ function Users() {
 				uid: user.uid,
 				name: user.name,
 				email: user.email,
-				isActive: user.isActive
+				isActive: user.isActive,
+				plateNumber: user.plateNumber || []
 			});
 		} else {
 			form.resetFields();
-			form.setFieldsValue({ isActive: true });
+			form.setFieldsValue({
+				isActive: true,
+				plateNumber: [""]
+			});
 		}
 	};
 

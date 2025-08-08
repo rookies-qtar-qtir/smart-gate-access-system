@@ -7,7 +7,6 @@ const CustomHeader = ({ collapsed, setCollapsed }) => {
     const location = window.location;
     const { lastStatusReceived } = useMQTT();
 
-    // Format the timestamp for display
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return "-";
         const date = new Date(timestamp);

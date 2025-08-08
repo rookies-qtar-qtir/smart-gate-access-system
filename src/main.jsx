@@ -1,4 +1,3 @@
-// src/main.jsx
 import React, { useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -13,35 +12,43 @@ import GateControl from './pages/GateControl';
 import Login from './pages/Login';
 import { MQTTProvider } from "./services/Connection";
 import { AuthProvider } from './services/AuthContext';
+import { AccessLogProvider } from './services/AccessLogContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import FloatingWebcamButton from './components/FloatingWebcamButton';
 import WebcamComponent from './components/Webcam';
+import FileUploadButton from './components/FileUploadButton';
+import RFIDLoadingProvider from './components/RFIDLoadingProvider';
 
 const webcamRef = React.createRef();
+const fileUploadRef = React.createRef();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-      <MQTTProvider webcamRef={webcamRef}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <App />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Home />} />
-              <Route path="users" element={<Users />} />
-              <Route path="access-log" element={<AccessLog />} />
-              <Route path="gate-control" element={<GateControl />} />
-            </Route>
-          </Routes>
-          
-          {/* Floating Webcam */}
-          <WebcamComponent ref={webcamRef} />
-          <FloatingWebcamButton webcamRef={webcamRef} />
-        </BrowserRouter>
+      <MQTTProvider webcamRef={webcamRef} fileUploadRef={fileUploadRef}>
+        <RFIDLoadingProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <AccessLogProvider>
+                    <App />
+                  </AccessLogProvider>
+                </ProtectedRoute>
+              }>
+                <Route index element={<Home />} />
+                <Route path="users" element={<Users />} />
+                <Route path="access-log" element={<AccessLog />} />
+                <Route path="gate-control" element={<GateControl />} />
+              </Route>
+            </Routes>
+
+            <WebcamComponent ref={webcamRef} />
+            <FileUploadButton ref={fileUploadRef} />
+            <FloatingWebcamButton webcamRef={webcamRef} />
+          </BrowserRouter>
+        </RFIDLoadingProvider>
       </MQTTProvider>
     </AuthProvider>
   </React.StrictMode>

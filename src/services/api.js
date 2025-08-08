@@ -18,7 +18,6 @@ const api = axios.create({
   headers: API_CONFIG.HEADERS,
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
@@ -34,7 +33,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => {
     console.log(`API Response: ${response.status} ${response.config.url}`);
@@ -43,24 +41,19 @@ api.interceptors.response.use(
   (error) => {
     console.error('API Response Error:', error.response?.data || error.message);
     
-    // PERBAIKAN: Jangan redirect otomatis untuk endpoint login
     if (error.response?.status === 401) {
-      // Cek apakah ini request ke endpoint login
       const isLoginRequest = error.config?.url?.includes('/auth/login');
       
       if (!isLoginRequest) {
-        // Hanya redirect jika bukan login request
         localStorage.removeItem('access_token');
         window.location.href = '/login';
       }
-      // Jika login request, biarkan error di-handle oleh komponen
     }
     
     return Promise.reject(error);
   }
 );
 
-// Auth Service
 export const authService = {
   login: async (email, password) => {
     try {
@@ -71,7 +64,7 @@ export const authService = {
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
-      throw error; // Throw error biar bisa di-handle di AuthContext
+      throw error;
     }
   },
 
@@ -90,7 +83,6 @@ export const authService = {
   }
 };
 
-// User Service
 export const userService = {
   getUsers: async () => {
     try {
@@ -166,7 +158,6 @@ export const userService = {
   },
 };
 
-// Access Logs Service
 export const accessLogsApi = {
   async getAll() {
     try {

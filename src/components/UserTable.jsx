@@ -7,6 +7,7 @@ import {
 	KeyOutlined,
 	CheckCircleOutlined,
 	CloseCircleOutlined,
+	NumberOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 
@@ -73,6 +74,11 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 					{isActive ? "Active" : "Inactive"}
 				</Tag>
 			),
+			filters: [
+				{ text: "Active", value: true },
+				{ text: "Inactive", value: false },
+			],
+			onFilter: (value, record) => record.isActive === value,
 		},
 		{
 			title: "Role",
@@ -83,6 +89,77 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 					{text.charAt(0).toUpperCase() + text.slice(1)}
 				</span>
 			),
+			filters: [
+				{ text: "ADMIN", value: "ADMIN" },
+				{ text: "PENGHUNI", value: "PENGHUNI" },
+			],
+			onFilter: (value, record) => record.role === value,
+		},
+		{
+			title: "Plate Number",
+			dataIndex: "plateNumber",
+			key: "plateNumber",
+			width: 200,
+			render: (plateNumbers) => {
+				if (Array.isArray(plateNumbers) && plateNumbers.length > 0) {
+
+					const validPlates = plateNumbers.filter(plate => plate && plate.trim() !== "");
+					
+					if (validPlates.length > 0) {
+						return (
+							<div className="flex flex-wrap gap-1">
+								{validPlates.map((plate, index) => (
+									<Tag
+										key={index}
+										color="blue"
+										icon={<NumberOutlined />}
+										className="mb-1"
+									>
+										{plate}
+									</Tag>
+								))}
+							</div>
+						);
+					}
+				}
+				
+				if (typeof plateNumbers === "string" && plateNumbers.trim() !== "") {
+					return (
+						<Tag color="blue" icon={<NumberOutlined />}>
+							{plateNumbers}
+						</Tag>
+					);
+				}
+				
+				return (
+					<Tag color="default">
+						No Plate
+					</Tag>
+				);
+			},
+			filters: [
+				{ text: "With Plate", value: true },
+				{ text: "Without Plate", value: false },
+			],
+			onFilter: (value, record) => {
+				const hasPlate = () => {
+					if (Array.isArray(record.plateNumber)) {
+						return record.plateNumber.some(plate => plate && plate.trim() !== "");
+					}
+					if (typeof record.plateNumber === "string") {
+						return record.plateNumber.trim() !== "";
+					}
+					return false;
+				};
+
+				if (value === true) {
+					return hasPlate();
+				}
+				if (value === false) {
+					return !hasPlate();
+				}
+				return true;
+			},
 		},
 		{
 			title: "Actions",
