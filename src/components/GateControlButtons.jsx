@@ -44,9 +44,9 @@ function GateControlButtons({ onGateControl }) {
 				<Button
 					size="large"
 					className={`flex-1 max-w-[140px] h-12 border-2 border-green-200 bg-green-50 hover:bg-green-100 text-green-700 hover:text-green-800 font-medium rounded-lg transition-all duration-200 hover:shadow-md ${
-						activeButton === "1" ? "scale-95 bg-green-100" : ""
+						activeButton === "open" ? "scale-95 bg-green-100" : ""
 					}`}
-					onClick={() => handleGateControl("1")}>
+					onClick={() => handleGateControl("open")}>
 					<div className="flex items-center gap-2">
 						<svg
 							className="w-4 h-4"
@@ -67,9 +67,9 @@ function GateControlButtons({ onGateControl }) {
 				<Button
 					size="large"
 					className={`flex-1 max-w-[140px] h-12 border-2 border-red-200 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 font-medium rounded-lg transition-all duration-200 hover:shadow-md ${
-						activeButton === "0" ? "scale-95 bg-red-100" : ""
+						activeButton === "closed" ? "scale-95 bg-red-100" : ""
 					}`}
-					onClick={() => handleGateControl("0")}>
+					onClick={() => handleGateControl("closed")}>
 					<div className="flex items-center gap-2">
 						<svg
 							className="w-4 h-4"

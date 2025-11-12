@@ -22,7 +22,7 @@ function SystemStatus({ deviceStatus }) {
         />
         <StatusCard
           label="Status Gerbang"
-          value={deviceStatus.servo === 1 ? "Terbuka" : "Tertutup"}
+          value={deviceStatus.servo === "open" ? "Terbuka" : "Tertutup"}
           icon={<FaDoorClosed />}
           iconColor="text-blue-500"
           borderColor="border-blue-500"
