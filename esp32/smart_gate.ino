@@ -5,25 +5,20 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-// WiFi configuration
-const char* ssid = "Xiaomi 13T";
-const char* password = "yakaligaarka";
+const char* ssid = "LIT-2.4G-CSSU";
+const char* password = "yakaligaarka2.4G";
 
-// MQTT broker configuration
-const char* mqtt_server = "broker.emqx.io";
+const char* mqtt_server = "192.168.18.5";
+const char* mqtt_user = "arkalit";
+const char* mqtt_pass = "arkamqtt";
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-// MQTT topics for communication
-const char* servo_topic = "/control/servo";
-const char* ping_topic = "/device/ping";
-const char* pong_topic = "/device/pong";
-const char* status_topic = "/device/status";
-const char* distance_topic = "/sensor/distance";
-const char* rfid_topic = "/sensor/rfid";
-const char* access_result_topic = "/control/access";
+const char* device_control = "/device/control";
+const char* device_status = "/device/status";
+const char* device_rfid = "/device/rfid";
 
-// RFID module pin configuration
 const int SS_PIN = 5;
 const int RST_PIN = 0;
 const int SCK_PIN = 18;
@@ -32,7 +27,6 @@ const int MISO_PIN = 19;
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
-// I/O pins and servo configuration
 const int servoPin = 32;
 const int TRIG_PIN = 23;
 const int ECHO_PIN = 22;
@@ -40,7 +34,6 @@ Servo servoMotor;
 char perintah = '0';
 bool autoMode = true;
 
-// Timer variables for periodic tasks
 unsigned long lastStatusTime = 0;
 unsigned long lastSensorTime = 0;
 unsigned long lastRfidCheckTime = 0;
@@ -48,14 +41,12 @@ const long statusInterval = 3000;
 const long sensorInterval = 500;
 const long rfidInterval = 200;
 
-// Distance and RFID detection settings
 int detectionThreshold = 10;
 unsigned long lastUidTime = 0;
 const long uidCooldown = 3000;
 
 String lastUidDetected = "";
 
-// Reads distance from ultrasonic sensor
 long readDistance() {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
@@ -69,16 +60,10 @@ long readDistance() {
   return distance;
 }
 
-// Publishes current servo status to MQTT
-void publishServoStatus() {
-  client.publish(servo_topic, String(perintah).c_str());
-  publishStatus();
-}
-
-// Publishes complete device status as JSON to MQTT
 void publishStatus() {
-  DynamicJsonDocument root(75);
+  DynamicJsonDocument root(256);
   JsonObject doc = root.to<JsonObject>();
+  
   doc["online"] = true;
   doc["servo"] = perintah == '1' ? 1 : 0;
   doc["auto_mode"] = autoMode;
@@ -88,17 +73,18 @@ void publishStatus() {
   long distance = readDistance();
   doc["distance"] = distance;
   doc["threshold"] = detectionThreshold;
+  doc["timestamp"] = millis();
 
   char jsonBuffer[256];
   serializeJson(doc, jsonBuffer);
 
-  client.publish(status_topic, jsonBuffer);
-  Serial.println("Status dipublikasikan");
+  client.publish(device_status, jsonBuffer);
+  Serial.println("Status published to /device/status");
+  Serial.println(jsonBuffer);
 }
 
-// Processes incoming MQTT messages
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Pesan diterima [");
+  Serial.print("Message received [");
   Serial.print(topic);
   Serial.print("] ");
 
@@ -108,84 +94,89 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println(message);
 
-  if (strcmp(topic, servo_topic) == 0) {
-    if (message == "1" && perintah != '1') {
-      Serial.println("Memutar servo ke posisi 90 (melalui MQTT)");
-      servoMotor.write(90);
-      perintah = '1';
-      publishServoStatus();
-    } else if (message == "0" && perintah != '0') {
-      Serial.println("Memutar servo ke posisi 0 (melalui MQTT)");
-      servoMotor.write(0);
-      perintah = '0';
-      publishServoStatus();
-    } else if (message == "auto") {
-      autoMode = true;
-      Serial.println("Mode sensor jarak untuk penutupan otomatis aktif");
-      publishStatus();
-    } else if (message == "manual") {
-      autoMode = false;
-      Serial.println("Mode manual (hanya MQTT) aktif");
-      publishStatus();
-    }
-  }
-  else if (strcmp(topic, ping_topic) == 0) {
-    String pongMessage = "online servo:" + String(perintah);
-    client.publish(pong_topic, pongMessage.c_str());
-    Serial.println("Ping diterima, mengirim pong");
-  }
-  else if (strcmp(topic, distance_topic) == 0) {
-    int newThreshold = message.toInt();
-    if (newThreshold > 0) {
-      detectionThreshold = newThreshold;
-      Serial.print("Threshold jarak diperbarui menjadi: ");
-      Serial.println(detectionThreshold);
-      publishStatus();
-    } else {
-      Serial.println("Pesan tidak valid untuk threshold jarak.");
-    }
-  }
-  else if (strcmp(topic, access_result_topic) == 0) {
-    StaticJsonDocument<200> doc;
+  if (strcmp(topic, device_control) == 0) {
+    DynamicJsonDocument doc(256);
     DeserializationError error = deserializeJson(doc, message);
+    
+    if (error) {
+      Serial.print("JSON parsing failed: ");
+      Serial.println(error.c_str());
+      return;
+    }
 
-    if (!error) {
-      bool accessGranted = doc["granted"];
-      String name = doc["name"].as<String>();
-      
+    if (doc.containsKey("servo")) {
+      int servoCommand = doc["servo"];
+      if (servoCommand == 1 && perintah != '1') {
+        Serial.println("Opening gate (servo to 90°)");
+        servoMotor.write(90);
+        perintah = '1';
+        publishStatus();
+      } else if (servoCommand == 0 && perintah != '0') {
+        Serial.println("Closing gate (servo to 0°)");
+        servoMotor.write(0);
+        perintah = '0';
+        publishStatus();
+      }
+    }
+    if (doc.containsKey("auto_mode")) {
+      bool newAutoMode = doc["auto_mode"];
+      if (newAutoMode != autoMode) {
+        autoMode = newAutoMode;
+        Serial.print("Auto mode changed to: ");
+        Serial.println(autoMode ? "enabled" : "disabled");
+        publishStatus();
+      }
+    }
+
+    if (doc.containsKey("threshold")) {
+      int newThreshold = doc["threshold"];
+      if (newThreshold > 0 && newThreshold != detectionThreshold) {
+        detectionThreshold = newThreshold;
+        Serial.print("Distance threshold updated to: ");
+        Serial.println(detectionThreshold);
+        publishStatus();
+      }
+    }
+
+    if (doc.containsKey("access_granted")) {
+      bool accessGranted = doc["access_granted"];
       if (accessGranted) {
-        Serial.print("Akses diberikan untuk: ");
-        Serial.println(name);
-        
+        Serial.println("Access granted!");
         if (perintah != '1') {
-          Serial.println("Membuka palang (posisi 90)");
+          Serial.println("Opening gate (servo to 90°)");
           servoMotor.write(90);
           perintah = '1';
-          publishServoStatus();
+          publishStatus();
         }
       } else {
-        Serial.println("Akses ditolak!");
+        Serial.println("Access denied!");
+      }
+    }
+
+    if (doc.containsKey("ping")) {
+      if (doc["ping"] == true) {
+        Serial.println("Ping received, publishing status");
+        publishStatus();
       }
     }
   }
 }
 
-// Reconnects to MQTT broker when connection is lost
 void reconnect() {
   while (!client.connected()) {
-    Serial.print("Menghubungkan ke MQTT...");
+    Serial.print("Connecting to MQTT...");
     String clientId = "ESP32Client-" + String(random(0xffff), HEX);
-    if (client.connect(clientId.c_str())) {
-      Serial.println("Terhubung ke MQTT!");
-      client.subscribe(servo_topic);
-      client.subscribe(ping_topic);
-      client.subscribe(distance_topic);
-      client.subscribe(access_result_topic);
+    if (client.connect(clientId.c_str(), mqtt_user, mqtt_pass)) {
+      Serial.println("Connected to MQTT!");
+      
+      client.subscribe(device_control);
+      Serial.println("Subscribed to /device/control");
+      
       publishStatus();
     } else {
-      Serial.print("Gagal, rc=");
+      Serial.print("Failed, rc=");
       Serial.print(client.state());
-      Serial.println(" Coba lagi dalam 5 detik");
+      Serial.println(" Retrying in 5 seconds");
       delay(5000);
     }
   }
@@ -193,7 +184,7 @@ void reconnect() {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Menyiapkan perangkat...");
+  Serial.println("Setting up device...");
 
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
@@ -207,7 +198,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("Terhubung ke Wi-Fi!");
+  Serial.println("Connected to Wi-Fi!");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 
@@ -234,30 +225,29 @@ void loop() {
 
   if (servoControlLock && (currentMillis - lastCommandTime >= commandCooldown)) {
     servoControlLock = false;
-    Serial.println("Cooldown selesai, siap menerima perintah baru.");
+    Serial.println("Cooldown finished, ready for new commands.");
   }
 
   if (autoMode && (currentMillis - lastSensorTime >= sensorInterval)) {
     lastSensorTime = currentMillis;
 
     long distance = readDistance();
-    Serial.print("Jarak: ");
+    Serial.print("Distance: ");
     Serial.print(distance);
     Serial.println(" cm");
 
     if (distance < detectionThreshold && !servoControlLock) {
       if (perintah != '0') {
-        Serial.println("Objek terdeteksi! Menutup servo (posisi 0)");
+        Serial.println("Object detected! Closing gate (servo to 0°)");
         servoMotor.write(0);
         perintah = '0';
-        publishServoStatus();
+        publishStatus();
 
         servoControlLock = true;
         lastCommandTime = currentMillis;
       }
     }
   }
-
   if (millisRfid - lastRfidCheckTime >= rfidInterval) {
     lastRfidCheckTime = millisRfid;
     handleRfid();
@@ -269,7 +259,6 @@ void loop() {
   }
 }
 
-// Handles RFID tag detection and processing
 void handleRfid() {
   if (!rfid.PICC_IsNewCardPresent()) {
     return;
@@ -291,19 +280,20 @@ void handleRfid() {
   lastUidDetected = uid;
   lastUidTime = currentTime;
 
-  Serial.print("Kartu terdeteksi, UID: ");
+  Serial.print("RFID card detected, UID: ");
   Serial.println(uid);
 
   if (!servoControlLock) {
-    StaticJsonDocument<100> doc;
+    DynamicJsonDocument doc(100);
     doc["uid"] = uid;
     doc["timestamp"] = currentTime;
 
     char jsonBuffer[100];
     serializeJson(doc, jsonBuffer);
 
-    client.publish(rfid_topic, jsonBuffer);
-    Serial.println("UID dipublikasikan ke MQTT");
+    client.publish(device_rfid, jsonBuffer);
+    Serial.println("RFID UID published to /device/rfid");
+    Serial.println(jsonBuffer);
 
     servoControlLock = true;
     lastCommandTime = currentTime;
@@ -312,26 +302,11 @@ void handleRfid() {
   haltPICC();
 }
 
-// Verifies if a new RFID card is present and can be read
-bool verifyNewCardPresence() {
-  if (!rfid.PICC_IsNewCardPresent()) {
-    return false;
-  }
-
-  if (!rfid.PICC_ReadCardSerial()) {
-    return false;
-  }
-
-  return true;
-}
-
-// Stops communication with the current RFID card
 void haltPICC() {
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
 }
 
-// Formats and returns the UID of the detected RFID card
 String getUID() {
   String uid = "";
   for (byte i = 0; i < rfid.uid.size; i++) {
