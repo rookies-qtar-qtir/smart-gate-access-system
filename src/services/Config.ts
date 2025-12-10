@@ -1,4 +1,28 @@
-const CONFIG = {
+export interface BrokerConfig {
+    host: string;
+    port: number;
+    path: string;
+    useSSL: boolean;
+    username?: string;
+    password?: string;
+}
+
+export interface MqttTopics {
+    statusTopic: string;
+    rfidTopic: string;
+}
+
+export interface PublishTopics {
+    controlTopic: string;
+}
+
+export interface AppConfig {
+    broker: BrokerConfig;
+    topics: MqttTopics;
+    topicPub: PublishTopics;
+}
+
+const CONFIG: AppConfig = {
     broker: {
         host: import.meta.env.VITE_BROKER_HOST,
         port: Number(import.meta.env.VITE_BROKER_PORT),
@@ -13,7 +37,7 @@ const CONFIG = {
     },
     topicPub: {
         controlTopic: import.meta.env.VITE_TOPIC_CONTROL,
-    } 
+    }
 };
 
 export default CONFIG;

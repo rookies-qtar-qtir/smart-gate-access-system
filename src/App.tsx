@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from 'antd';
 import Sidebar from './components/Sidebar';
@@ -9,7 +9,7 @@ const { Footer, Content } = Layout;
 
 const App = () => {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState<boolean>(false);
 
   return (
     <Layout className="bg-gray-100 flex w-full h-screen">

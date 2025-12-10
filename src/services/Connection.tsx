@@ -1,20 +1,38 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode, RefObject } from "react";
 import { Client, Message } from "paho-mqtt";
+import type { ConnectionOptions } from "paho-mqtt";
 import { message as antdMessage } from "antd";
 import CONFIG from "./Config";
 import { MQTTContext } from "./MqttContext";
-import { userService, accessLogsApi } from "./api.js";
-import WebcamComponent from '../components/Webcam';
+import { userService, accessLogsApi } from "./api";
+import type { ControlPayload, DeviceStatus, MqttLogEntry, RfidPayload } from "../domain/mqtt";
+import type { FileUploadHandle, WebcamHandle } from "../domain/controls";
 
-export const MQTTProvider = ({ children, webcamRef  }) => {
+type AccessProcessResult = {
+  data?: {
+    access?: boolean;
+    [key: string]: unknown;
+  };
+  access?: boolean;
+  message?: string;
+};
+
+interface MQTTProviderProps {
+  children: ReactNode;
+  webcamRef?: RefObject<WebcamHandle | null>;
+  fileUploadRef?: RefObject<FileUploadHandle | null>;
+}
+
+export const MQTTProvider = ({ children, webcamRef }: MQTTProviderProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("Disconnected");
   const [lastStatusReceived, setLastStatusReceived] = useState(Date.now());
-  const clientRef = useRef(null);
+  const clientRef = useRef<Client | null>(null);
   const connectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
   const heartbeatTimeout = 30000;
-  const [deviceStatus, setDeviceStatus] = useState({
+  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({
     online: false,
     auto_mode: true,
     ip: "",
@@ -23,13 +41,13 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
     threshold: null,
     servo: null,
   });
-  const [controlPayload, setControlPayload] = useState({
+  const [controlPayload] = useState<ControlPayload>({
     servo: null,
     threshold: null,
   });
-  const [mqttLogs, setMqttLogs] = useState([]);
-  const [rfidPayload, setRfidPayload] = useState(null);
-  const subscribedTopics = useRef(new Set());
+  const [mqttLogs, setMqttLogs] = useState<MqttLogEntry[]>([]);
+  const [rfidPayload, setRfidPayload] = useState<RfidPayload | null>(null);
+  const subscribedTopics = useRef<Set<string>>(new Set());
 
   const connect = () => {
     connectAttemptsRef.current += 1;
@@ -63,8 +81,12 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
 
       if (topic === CONFIG.topics.statusTopic) {
         try {
-          const parsedPayload = JSON.parse(payload);
-          setDeviceStatus(parsedPayload);
+          const parsedPayload = JSON.parse(payload) as Partial<DeviceStatus>;
+          setDeviceStatus((prev) => ({
+            ...prev,
+            ...parsedPayload,
+            online: parsedPayload.online ?? prev.online,
+          }));
           setLastStatusReceived(Date.now());
         } catch (error) {
           console.error("Failed to parse device status:", error);
@@ -73,19 +95,19 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
 
       if (topic === CONFIG.topics.rfidTopic) {
         try {
-          const parsedPayload = JSON.parse(payload);
+          const parsedPayload = JSON.parse(payload) as RfidPayload;
           setRfidPayload(parsedPayload);
           setLastStatusReceived(Date.now());
 
           if (parsedPayload.uid) {
-            processRFIDAccess(parsedPayload.uid);
+            void processRFIDAccess(parsedPayload.uid);
           }
         } catch (error) {
           console.error("Failed to parse RFID payload:", error);
         }
       }
 
-      const logEntry = {
+      const logEntry: MqttLogEntry = {
         time: now,
         action: "subscribe",
         message: payload,
@@ -94,7 +116,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
       setMqttLogs((prev) => [logEntry, ...prev.slice(0, 99)]);
     };
 
-    const connectOptions = {
+    const connectOptions: ConnectionOptions & { reconnect?: boolean } = {
       useSSL: CONFIG.broker.useSSL,
       keepAliveInterval: 30,
       cleanSession: true,
@@ -120,7 +142,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
           }
         });
       },
-      onFailure: (err) => {
+      onFailure: (err: { errorMessage?: string }) => {
         console.error("Connection failed:", err);
         setIsConnected(false);
         setStatus(`Failed: ${err.errorMessage || 'Unknown error'}`);
@@ -152,7 +174,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
     }
   };
 
-  const sendMessage = (topic, payload) => {
+  const sendMessage = (topic: string, payload: string) => {
     if (clientRef.current && clientRef.current.isConnected()) {
       try {
         const mqttMessage = new Message(payload);
@@ -200,7 +222,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
     connectAttemptsRef.current = 0;
   };
 
-  const processRFIDAccess = async (uid) => {
+  const processRFIDAccess = async (uid: string): Promise<AccessProcessResult | null> => {
     try {
       const imageFile = webcamRef?.current?.captureImage?.();
 
@@ -242,7 +264,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
   useEffect(() => {
     connect();
 
-    const heartbeatChecker = setInterval(() => {
+    const heartbeatChecker = window.setInterval(() => {
       const now = Date.now();
       if (now - lastStatusReceived > heartbeatTimeout) {
         // device dianggap offline
@@ -255,7 +277,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
 
     return () => {
       disconnect();
-      clearInterval(heartbeatChecker);
+      window.clearInterval(heartbeatChecker);
     };
   }, []);
 

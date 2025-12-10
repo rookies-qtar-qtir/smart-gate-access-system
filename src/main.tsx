@@ -1,16 +1,15 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import '@ant-design/v5-patch-for-react-19';
-
+import App from './App';
+import './index.css';
 import Home from './pages/Home';
 import Users from './pages/Users';
 import AccessLog from './pages/AccessLog';
 import GateControl from './pages/GateControl';
 import Login from './pages/Login';
-import { MQTTProvider } from "./services/Connection";
+import { MQTTProvider } from './services/Connection';
 import { AuthProvider } from './services/AuthContext';
 import { AccessLogProvider } from './services/AccessLogContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -18,11 +17,18 @@ import FloatingWebcamButton from './components/FloatingWebcamButton';
 import WebcamComponent from './components/Webcam';
 import FileUploadButton from './components/FileUploadButton';
 import RFIDLoadingProvider from './components/RFIDLoadingProvider';
+import type { FileUploadHandle, WebcamHandle } from './domain/controls';
 
-const webcamRef = React.createRef();
-const fileUploadRef = React.createRef();
+const webcamRef = React.createRef<WebcamHandle | null>();
+const fileUploadRef = React.createRef<FileUploadHandle | null>();
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <AuthProvider>
       <MQTTProvider webcamRef={webcamRef} fileUploadRef={fileUploadRef}>
