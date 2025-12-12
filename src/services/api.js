@@ -104,15 +104,15 @@ export const userService = {
     }
   },
 
-  getUserByUid: async (uid) => {
+  getUserByPid: async (pid) => {
     try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS}/uid/${uid}`);
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS}/pid/${pid}`);
       return response.data.data;
     } catch (error) {
       if (error.response?.status === 404) {
         return null;
       }
-      console.error('Error fetching user by UID:', error);
+      console.error('Error fetching user by PID:', error);
       throw error;
     }
   },
@@ -169,12 +169,12 @@ export const accessLogsApi = {
     }
   },
 
-  async getByUid(uid) {
+  async getByPid(pid) {
     try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/uid/${uid}`);
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/pid/${pid}`);
       return response.data.data || [];
     } catch (error) {
-      console.error('Error fetching access logs by UID:', error);
+      console.error('Error fetching access logs by PID:', error);
       throw error;
     }
   },
@@ -213,10 +213,10 @@ export const accessLogsApi = {
     }
   },
 
-  async processRFIDAccess(uid, imageFile) {
+  async processRFIDAccess(pid, imageFile) {
     try {
       const formData = new FormData();
-      formData.append('uid', uid);
+      formData.append('pid', pid);
       if (imageFile) {
         formData.append('image', imageFile);
       }

@@ -8,7 +8,7 @@ const RFIDTestPublisher = () => {
 
     const publishTestStatus = () => {
         const testPayload = {
-			uid: "4e2549c51",
+            pid: "4e2549c51",
 		};
 
         const success = sendMessage(CONFIG.topics.rfidTopic, JSON.stringify(testPayload));

@@ -23,9 +23,9 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 			width: 80,
 		},
 		{
-			title: "UID",
-			dataIndex: "uid",
-			key: "uid",
+			title: "PID",
+			dataIndex: "pid",
+			key: "pid",
 			width: 170,
 			render: (text) => (
 				<span className="font-medium text-xs bg-gray-100 px-2 py-1 rounded">
@@ -231,6 +231,7 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 					onChange: handlePaginationChange,
 					onShowSizeChange: handleShowSizeChange,
 				}}
+				scroll={{ x: 800 }}
 				className="border rounded-lg"
 			/>
 		</section>

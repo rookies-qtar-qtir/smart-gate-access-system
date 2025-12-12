@@ -32,10 +32,10 @@ function Users() {
 		fetchUsers();
 	}, []);
 
-	const checkUidUnique = (uid, excludeId = null) => {
+	const checkPidUnique = (pid, excludeId = null) => {
 		return !users.some(
 			(user) =>
-				user.uid.toLowerCase() === uid.toLowerCase() &&
+				user.pid.toLowerCase() === pid.toLowerCase() &&
 				user.id !== excludeId
 		);
 	};
@@ -51,13 +51,13 @@ function Users() {
 	const handleSubmit = async (values) => {
 		console.log("Form values submitted:", values);
 
-		if (!editingUser && !checkUidUnique(values.uid)) {
-			message.error("UID already exists! Please use a unique UID.");
+		if (!editingUser && !checkPidUnique(values.pid)) {
+			message.error("PID already exists! Please use a unique PID.");
 			return;
 		}
 
-		if (editingUser && !checkUidUnique(values.uid, editingUser.id)) {
-			message.error("UID already exists! Please use a unique UID.");
+		if (editingUser && !checkPidUnique(values.pid, editingUser.id)) {
+			message.error("PID already exists! Please use a unique PID.");
 			return;
 		}
 		
@@ -74,7 +74,7 @@ function Users() {
 		setLoading(true);
 		try {
 			const userData = {
-				uid: values.uid,
+				pid: values.pid,
 				name: values.name,
 				email: values.email,
 				isActive: values.isActive !== undefined ? values.isActive : true,
@@ -100,8 +100,8 @@ function Users() {
 				setOnUserUpdatedCallback(null);
 			}
 		} catch (error) {
-			if (error.message && error.message.includes("UID")) {
-				message.error("UID already exists! Please use a unique UID.");
+			if (error.message && error.message.includes("PID")) {
+				message.error("PID already exists! Please use a unique PID.");
 			} else if (error.message && error.message.includes("email")) {
 				message.error("Email already exists! Please use a unique email.");
 			} else {
@@ -139,7 +139,7 @@ function Users() {
 
 		if (user) {
 			form.setFieldsValue({
-				uid: user.uid,
+				pid: user.pid,
 				name: user.name,
 				email: user.email,
 				isActive: user.isActive,
@@ -206,7 +206,7 @@ function Users() {
 				onCancel={closeModal}
 				form={form}
 				users={users}
-				checkUidUnique={checkUidUnique}
+				checkPidUnique={checkPidUnique}
 				checkEmailUnique={checkEmailUnique}
 			/>
 		</div>

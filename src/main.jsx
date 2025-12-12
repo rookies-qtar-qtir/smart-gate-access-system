@@ -16,16 +16,32 @@ import { AccessLogProvider } from './services/AccessLogContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import FloatingWebcamButton from './components/FloatingWebcamButton';
 import WebcamComponent from './components/Webcam';
-import FileUploadButton from './components/FileUploadButton';
 import RFIDLoadingProvider from './components/RFIDLoadingProvider';
 
 const webcamRef = React.createRef();
-const fileUploadRef = React.createRef();
+
+const WebcamWrapper = () => {
+  const handleHideShow = (isHidden) => {
+    if (webcamRef.current) {
+      webcamRef.current.hideView(isHidden);
+    }
+  };
+
+  return (
+    <>
+      <WebcamComponent ref={webcamRef} />
+      <FloatingWebcamButton
+        webcamRef={webcamRef}
+        onHideShow={handleHideShow}
+      />
+    </>
+  );
+};
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-      <MQTTProvider webcamRef={webcamRef} fileUploadRef={fileUploadRef}>
+      <MQTTProvider webcamRef={webcamRef}>
         <RFIDLoadingProvider>
           <BrowserRouter>
             <Routes>
@@ -44,9 +60,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               </Route>
             </Routes>
 
-            <WebcamComponent ref={webcamRef} />
-            <FileUploadButton ref={fileUploadRef} />
-            <FloatingWebcamButton webcamRef={webcamRef} />
+            <WebcamWrapper />
           </BrowserRouter>
         </RFIDLoadingProvider>
       </MQTTProvider>

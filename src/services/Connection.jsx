@@ -4,16 +4,19 @@ import { message as antdMessage } from "antd";
 import CONFIG from "./Config";
 import { MQTTContext } from "./MqttContext";
 import { userService, accessLogsApi } from "./api.js";
-import WebcamComponent from '../components/Webcam';
+import WebcamComponent from "../components/Webcam";
 
-export const MQTTProvider = ({ children, webcamRef  }) => {
+export const MQTTProvider = ({ children, webcamRef }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("Disconnected");
   const [lastStatusReceived, setLastStatusReceived] = useState(Date.now());
+
   const clientRef = useRef(null);
   const connectAttemptsRef = useRef(0);
+
   const maxReconnectAttempts = 5;
   const heartbeatTimeout = 30000;
+
   const [deviceStatus, setDeviceStatus] = useState({
     online: false,
     auto_mode: true,
@@ -23,18 +26,26 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
     threshold: null,
     servo: null,
   });
+
   const [controlPayload, setControlPayload] = useState({
     servo: null,
     threshold: null,
   });
+
   const [mqttLogs, setMqttLogs] = useState([]);
   const [rfidPayload, setRfidPayload] = useState(null);
   const subscribedTopics = useRef(new Set());
 
+  const [isProcessingRFID, setIsProcessingRFID] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState("");
+
   const connect = () => {
     connectAttemptsRef.current += 1;
     setStatus("Connecting...");
-    const uniqueClientId = `mqtt_client_${Math.random().toString(16).substr(2, 8)}_${Date.now()}`;
+
+    const uniqueClientId = `mqtt_client_${Math.random()
+      .toString(16)
+      .substr(2, 8)}_${Date.now()}`;
 
     const client = new Client(
       CONFIG.broker.host,
@@ -42,6 +53,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
       CONFIG.broker.path,
       uniqueClientId
     );
+
     clientRef.current = client;
 
     client.onConnectionLost = (responseObject) => {
@@ -77,8 +89,8 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
           setRfidPayload(parsedPayload);
           setLastStatusReceived(Date.now());
 
-          if (parsedPayload.uid) {
-            processRFIDAccess(parsedPayload.uid);
+          if (parsedPayload.pid) {
+            processRFIDAccess(parsedPayload.pid);
           }
         } catch (error) {
           console.error("Failed to parse RFID payload:", error);
@@ -102,6 +114,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
       timeout: 10,
       userName: CONFIG.broker.username,
       password: CONFIG.broker.password,
+
       onSuccess: () => {
         connectAttemptsRef.current = 0;
         setIsConnected(true);
@@ -120,11 +133,14 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
           }
         });
       },
+
       onFailure: (err) => {
         console.error("Connection failed:", err);
         setIsConnected(false);
-        setStatus(`Failed: ${err.errorMessage || 'Unknown error'}`);
-        antdMessage.error(`Failed to connect: ${err.errorMessage || 'Unknown error'}`);
+        setStatus(`Failed: ${err.errorMessage || "Unknown error"}`);
+        antdMessage.error(
+          `Failed to connect: ${err.errorMessage || "Unknown error"}`
+        );
         attemptReconnect();
       },
     };
@@ -140,15 +156,23 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
 
   const attemptReconnect = () => {
     if (connectAttemptsRef.current < maxReconnectAttempts) {
-      const delay = Math.min(3000 * (connectAttemptsRef.current), 15000);
-      setStatus(`Reconnecting in ${delay / 1000}s (attempt ${connectAttemptsRef.current}/${maxReconnectAttempts})...`);
+      const delay = Math.min(
+        3000 * connectAttemptsRef.current,
+        15000
+      );
+
+      setStatus(
+        `Reconnecting in ${delay / 1000}s (attempt ${connectAttemptsRef.current}/${maxReconnectAttempts})...`
+      );
 
       setTimeout(() => {
         connect();
       }, delay);
     } else {
       setStatus(`Failed after ${maxReconnectAttempts} attempts. Please try again later.`);
-      antdMessage.error(`Connection failed after ${maxReconnectAttempts} attempts. Please try again later.`);
+      antdMessage.error(
+        `Connection failed after ${maxReconnectAttempts} attempts. Please try again later.`
+      );
     }
   };
 
@@ -169,7 +193,6 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
           },
           ...prev.slice(0, 99),
         ]);
-
         return true;
       } catch (error) {
         console.error("Error sending message:", error);
@@ -200,42 +223,73 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
     connectAttemptsRef.current = 0;
   };
 
-  const processRFIDAccess = async (uid) => {
+  const getImageForProcessing = () => {
     try {
-      const imageFile = webcamRef?.current?.captureImage?.();
+      if (webcamRef?.current?.captureImage) {
+        console.log("Using webcam capture");
+        return webcamRef.current.captureImage();
+      }
 
-      const accessResult = await accessLogsApi.processRFIDAccess(uid, imageFile);
+      console.log("No image source available");
+      antdMessage.warning("No image processing available");
+      return null;
+    } catch (error) {
+      console.error("Error getting image:", error);
+      antdMessage.error("Error getting image for processing");
+      return null;
+    }
+  };
+
+  const processRFIDAccess = async (pid) => {
+    try {
+      setIsProcessingRFID(true);
+      const imageFile = webcamRef?.current?.captureImage?.();
+      const accessResult = await accessLogsApi.processRFIDAccess(pid, imageFile);
+
       console.log("Access result:", accessResult);
 
-      const user = await userService.getUserByUid(uid);
+      const user = await userService.getUserByPid(pid);
       console.log("User found:", user);
 
+      const name = user ? user.name : pid;
+
       if (accessResult?.data?.access === true) {
-        const name = user ? user.name : uid;
         antdMessage.success(`Access granted for ${name}`);
 
-        const gateOpenPayload = JSON.stringify({ 
+        const gateOpenPayload = JSON.stringify({
           ...controlPayload,
-          servo: "1" 
+          servo: "open",
         });
+
         sendMessage(CONFIG.topicPub.controlTopic, gateOpenPayload);
       } else {
-        const name = user ? user.name : uid;
-        antdMessage.error(`Access denied for ${name}: ${accessResult.message}`);
+        antdMessage.error(
+          `Access denied for ${name}: ${accessResult.message}`
+        );
       }
 
       return accessResult;
     } catch (error) {
       console.error("Error processing RFID access:", error);
       antdMessage.error("Error processing RFID access");
+      setIsProcessingRFID(false);
 
       try {
-        const errorResult = await accessLogsApi.processRFIDAccess(uid);
+        const errorResult = await accessLogsApi.processRFIDAccess(pid);
         return errorResult;
       } catch (logError) {
         console.error("Error logging access attempt:", logError);
         return null;
       }
+    } finally {
+      setIsProcessingRFID(false);
+      setProcessingMessage("");
+
+      window.dispatchEvent(
+        new CustomEvent("rfidProcessComplete", {
+          detail: { pid, timestamp: Date.now() },
+        })
+      );
     }
   };
 
@@ -245,11 +299,7 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
     const heartbeatChecker = setInterval(() => {
       const now = Date.now();
       if (now - lastStatusReceived > heartbeatTimeout) {
-        // device dianggap offline
-        setDeviceStatus((prev) => ({
-          ...prev,
-          online: false
-        }));
+        setDeviceStatus((prev) => ({ ...prev, online: false }));
       }
     }, 10000);
 
@@ -272,6 +322,10 @@ export const MQTTProvider = ({ children, webcamRef  }) => {
         mqttLogs,
         rfidPayload,
         controlPayload,
+        getImageForProcessing,
+        webcamRef,
+        isProcessingRFID,
+        processingMessage,
       }}
     >
       {children}

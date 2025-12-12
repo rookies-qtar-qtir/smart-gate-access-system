@@ -1,3 +1,7 @@
 {
-  "authorized_uids": ["9e84ce05", "c4df4202", "6b403c02"]
+  "authorized_pids": [
+    "9e84ce05",
+    "c4df4202",
+    "6b403c02"
+  ]
 }

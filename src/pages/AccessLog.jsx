@@ -12,7 +12,7 @@ function AccessLog() {
 
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
-  const [searchUid, setSearchUid] = useState('');
+  const [searchPid, setSearchPid] = useState('');
   const [dateRange, setDateRange] = useState(null);
 
   useEffect(() => {
@@ -21,14 +21,14 @@ function AccessLog() {
 
   useEffect(() => {
     applyFilters();
-  }, [globalAccessLogs, filterStatus, searchUid, dateRange]);
+  }, [globalAccessLogs, filterStatus, searchPid, dateRange]);
 
   useEffect(() => {
     const handleRFIDProcessComplete = async (event) => {
       console.log('RFID processing completed, refreshing access logs...', event.detail);
       try {
         await refreshData();
-        // message.success(`UID: ${event.detail.uid} processed successfully`);
+        // message.success(`PID: ${event.detail.pid} processed successfully`);
       } catch (error) {
         console.error('Failed to refresh access logs after RFID processing:', error);
       }
@@ -48,9 +48,9 @@ function AccessLog() {
       filtered = filtered.filter(log => log.status === filterStatus);
     }
 
-    if (searchUid) {
+    if (searchPid) {
       filtered = filtered.filter(log =>
-        log.uid.toLowerCase().includes(searchUid.toLowerCase())
+        log.pid.toLowerCase().includes(searchPid.toLowerCase())
       );
     }
 
@@ -94,8 +94,8 @@ function AccessLog() {
       {/* Filters Section */}
       <div className="my-3">
         <AccessLogFilters
-          searchUid={searchUid}
-          setSearchUid={setSearchUid}
+          searchPid={searchPid}
+          setSearchPid={setSearchPid}
           filterStatus={filterStatus}
           onStatusFilter={handleStatusFilter}
           dateRange={dateRange}

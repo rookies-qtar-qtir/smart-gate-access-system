@@ -63,7 +63,6 @@ function Sidebar({ collapsed, setCollapsed }) {
         background: '#001529'
       }}
     >
-      {/* Container untuk mengatur layout vertikal */}
       <div className="flex flex-col h-full">
 
         {/* Header/Logo Section */}
@@ -71,7 +70,7 @@ function Sidebar({ collapsed, setCollapsed }) {
           <Logo collapsed={collapsed} />
         </div>
 
-        {/* Menu Section - Flex grow untuk mengambil space yang tersisa */}
+        {/* Menu Section\ */}
         <div className="flex-1 overflow-y-auto">
           <Menu
             selectedKeys={[activeMenuItem.key]}
@@ -125,7 +124,7 @@ function Sidebar({ collapsed, setCollapsed }) {
           </div>
         )}
 
-        {/* Status Section - Fixed di bottom */}
+        {/* Status Section */}
         <div className="border-t border-gray-700 bg-gray-800">
           <div className={`p-3 text-xs space-y-2 ${collapsed ? 'text-center' : ''}`}>
             <div className="flex items-center justify-between">
