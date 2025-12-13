@@ -8,17 +8,17 @@ function UserFormModal({
 	onSubmit,
 	onCancel,
 	form,
-	checkPidUnique,
+	checkUidUnique,
 	checkEmailUnique,
 }) {
-	const validatePid = (_, value) => {
+	const validateUid = (_, value) => {
 		if (!value) {
 			return Promise.resolve();
 		}
 
-		if (!checkPidUnique(value, editingUser?.id)) {
+		if (!checkUidUnique(value, editingUser?.id)) {
 			return Promise.reject(
-				new Error("This PID already exists! Please use a unique PID.")
+				new Error("This UID already exists! Please use a unique UID.")
 			);
 		}
 
@@ -53,35 +53,35 @@ function UserFormModal({
 				className="mt-4"
 				initialValues={{ isActive: true }}>
 				<Form.Item
-					label="PID"
-					name="pid"
+					label="UID"
+					name="uid"
 					rules={[
-						{ required: true, message: "Please input the PID!" },
+						{ required: true, message: "Please input the UID!" },
 						{
 							min: 8,
-							message: "PID must be at least 8 characters!",
+							message: "UID must be at least 8 characters!",
 						},
 						{
 							max: 32,
-							message: "PID cannot exceed 32 characters!",
+							message: "UID cannot exceed 32 characters!",
 						},
 						{
 							pattern: /^[a-zA-Z0-9]+$/,
 							message:
-								"PID can only contain letters and numbers!",
+								"UID can only contain letters and numbers!",
 						},
-						{ validator: validatePid },
+						{ validator: validateUid },
 					]}
 					hasFeedback>
 					<Input
 						prefix={<KeyOutlined />}
-						placeholder="Enter PID (8–32 alphanumeric characters)"
+						placeholder="Enter UID (8–32 alphanumeric characters)"
 						size="large"
 						maxLength={32}
 						style={{ fontFamily: "monospace" }}
 						onChange={(e) => {
 							const value = e.target.value.toLowerCase();
-							form.setFieldsValue({ pid: value });
+							form.setFieldsValue({ uid: value });
 						}}
 					/>
 				</Form.Item>
@@ -124,6 +124,7 @@ function UserFormModal({
 
 				<Form.Item
 					label="Plate Number"
+					required
 				>
 					<Form.List name="plateNumber" rules={[
 						{
@@ -142,7 +143,7 @@ function UserFormModal({
 										required
 										{...restField}
 										name={name}
-										rules={[{ required: false, message: 'Please input the plate number!' }]}
+										rules={[{ required: true, message: 'Please input the plate number!' }]}
 									>
 										<Input
 											placeholder="Enter plate number"

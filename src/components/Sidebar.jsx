@@ -63,6 +63,7 @@ function Sidebar({ collapsed, setCollapsed }) {
         background: '#001529'
       }}
     >
+      {/* Container untuk mengatur layout vertikal */}
       <div className="flex flex-col h-full">
 
         {/* Header/Logo Section */}
@@ -70,7 +71,7 @@ function Sidebar({ collapsed, setCollapsed }) {
           <Logo collapsed={collapsed} />
         </div>
 
-        {/* Menu Section\ */}
+        {/* Menu Section - Flex grow untuk mengambil space yang tersisa */}
         <div className="flex-1 overflow-y-auto">
           <Menu
             selectedKeys={[activeMenuItem.key]}
@@ -86,14 +87,14 @@ function Sidebar({ collapsed, setCollapsed }) {
             />
         </div>
 
-        {/* Test Components - Hanya tampil dalam development */}
+        {/* Test Components - Hanya tampil dalam development
         {process.env.NODE_ENV === 'development' && (
           <div className="border-t border-gray-700 p-2 space-y-1">
             <TestPublisher />
             <RFIDTestPublisher />
             <PublishControl />
           </div>
-        )}
+        )} */}
         
         {/* User Profile Section */}
         {user && (
@@ -124,7 +125,7 @@ function Sidebar({ collapsed, setCollapsed }) {
           </div>
         )}
 
-        {/* Status Section */}
+        {/* Status Section - Fixed di bottom */}
         <div className="border-t border-gray-700 bg-gray-800">
           <div className={`p-3 text-xs space-y-2 ${collapsed ? 'text-center' : ''}`}>
             <div className="flex items-center justify-between">

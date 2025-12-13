@@ -10,19 +10,19 @@ import {
 import { userService } from "../services/api";
 
 function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
-	const [searchPid, setSearchPid] = useState("");
+	const [searchUid, setSearchUid] = useState("");
 	const [searchResult, setSearchResult] = useState(null);
 	const [searchLoading, setSearchLoading] = useState(false);
 
-	const handleSearchByPid = async () => {
-		if (!searchPid.trim()) {
-			message.warning("Please enter a PID to search");
+	const handleSearchByUid = async () => {
+		if (!searchUid.trim()) {
+			message.warning("Please enter a UID to search");
 			return;
 		}
 
 		setSearchLoading(true);
 		try {
-			const user = await userService.getUserByPid(searchPid.trim());
+			const user = await userService.getUserByUid(searchUid.trim());
 			setSearchResult(user);
 			message.success("User found successfully");
 		} catch (error) {
@@ -35,7 +35,7 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 	};
 
 	const clearSearch = () => {
-		setSearchPid("");
+		setSearchUid("");
 		setSearchResult(null);
 	};
 
@@ -43,7 +43,7 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 		onEditUser(user);
 		if (onUserUpdated) {
 			onUserUpdated(() => {
-				handleSearchByPid();
+				handleSearchByUid();
 			});
 		}
 	};
@@ -51,7 +51,7 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 	const handleDelete = async (userId) => {
 		await onDeleteUser(userId);
 		setSearchResult(null);
-		setSearchPid("");
+		setSearchUid("");
 	};
 
 	return (
@@ -61,10 +61,10 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 					<div className="flex gap-3">
 						<div className="flex-1">
 							<Input
-								placeholder="Enter PID (e.g., 9e84ce05)"
-								value={searchPid}
-								onChange={(e) => setSearchPid(e.target.value)}
-								onPressEnter={handleSearchByPid}
+								placeholder="Enter UID (e.g., 9e84ce05)"
+								value={searchUid}
+								onChange={(e) => setSearchUid(e.target.value)}
+								onPressEnter={handleSearchByUid}
 								size="large"
 								prefix={
 									<SearchOutlined className="text-gray-400" />
@@ -81,12 +81,12 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 							type="primary"
 							size="large"
 							icon={<SearchOutlined />}
-							onClick={handleSearchByPid}
+							onClick={handleSearchByUid}
 							loading={searchLoading}
 							className="px-6 rounded-lg">
 							Search
 						</Button>
-						{(searchPid || searchResult) && (
+						{(searchUid || searchResult) && (
 							<Button
 								size="large"
 								onClick={clearSearch}
@@ -105,10 +105,10 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 						<div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 							<div>
 								<p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-									PID
+									UID
 								</p>
 								<p className="font-mono text-sm bg-white px-3 py-2 rounded-md border shadow-sm">
-									{searchResult.pid}
+									{searchResult.uid}
 								</p>
 							</div>
 							<div>

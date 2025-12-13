@@ -8,7 +8,7 @@ const TestPublisher = () => {
 
   const publishControlPayload = () => {
     const testPayload = {
-      servo: "open",
+      servo: "1",
       threshold: 7,
     };
 

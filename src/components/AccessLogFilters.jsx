@@ -5,8 +5,8 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 function AccessLogFilters({
-	searchPid,
-	setSearchPid,
+	searchUid,
+	setSearchUid,
 	filterStatus,
 	onStatusFilter,
 	dateRange,
@@ -19,10 +19,10 @@ function AccessLogFilters({
 			<Row gutter={16} align="middle">
 				<Col span={6}>
 					<Input
-						placeholder="Search by PID"
+						placeholder="Search by UID"
 						prefix={<SearchOutlined />}
-						value={searchPid}
-						onChange={(e) => setSearchPid(e.target.value)}
+						value={searchUid}
+						onChange={(e) => setSearchUid(e.target.value)}
 						allowClear
 					/>
 				</Col>

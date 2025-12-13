@@ -16,7 +16,6 @@ const WebcamComponent = forwardRef((props, ref) => {
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [capturedImage, setCapturedImage] = useState(null);
   const [visible, setVisible] = useState(true);
-  const [viewHidden, setViewHidden] = useState(false);
 
   const getVideoDevices = async () => {
     const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -81,13 +80,9 @@ const WebcamComponent = forwardRef((props, ref) => {
     toggle: () => {
       setVisible((prev) => !prev);
     },
-    hideView: (shouldHide) => {
-      setViewHidden(shouldHide);
-    },
   }));
 
   if (!visible) return null;
-
 
   return (
     <div
@@ -97,9 +92,6 @@ const WebcamComponent = forwardRef((props, ref) => {
         right: "80px",
         zIndex: 1000,
         width: 360,
-        opacity: viewHidden ? 0 : 1,
-        pointerEvents: viewHidden ? 'none' : 'auto',
-        transition: 'opacity 0.3s ease-in-out'
       }}
     >
       <Card title="Live Camera" size="small" bodyStyle={{ padding: 10 }}>
