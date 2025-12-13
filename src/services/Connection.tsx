@@ -62,7 +62,7 @@ export const MQTTProvider = ({ children, webcamRef }: MQTTProviderProps) => {
     );
     clientRef.current = client;
 
-    client.onConnectionLost = (responseObject) => {
+    client.onConnectionLost = (responseObject: { errorCode: number; errorMessage?: string }) => {
       if (responseObject.errorCode !== 0) {
         console.log("Connection lost: " + responseObject.errorMessage);
         antdMessage.error("Connection lost: " + responseObject.errorMessage);

@@ -26,7 +26,8 @@ const CONFIG: AppConfig = {
     broker: {
         host: import.meta.env.VITE_BROKER_HOST,
         port: Number(import.meta.env.VITE_BROKER_PORT),
-        path: import.meta.env.VITE_BROKER_PATH,
+        // default to /mqtt when env not provided to avoid undefined path errors
+        path: import.meta.env.VITE_BROKER_PATH || "/mqtt",
         useSSL: import.meta.env.VITE_BROKER_SSL === 'true',
         username: import.meta.env.VITE_BROKER_USERNAME,
         password: import.meta.env.VITE_BROKER_PASSWORD,
