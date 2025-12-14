@@ -4,7 +4,7 @@ export type AccessStatus = "GRANTED" | "DENIED";
 
 export interface AccessLogEntry {
   id?: number | string;
-  uid: string;
+  pid: string;
   timestamp: string;
   vehicle?: string;
   plateNumber?: string;

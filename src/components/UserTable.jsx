@@ -24,8 +24,8 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 		},
 		{
 			title: "UID",
-			dataIndex: "uid",
-			key: "uid",
+			dataIndex: "pid",
+			key: "pid",
 			width: 170,
 			render: (text) => (
 				<span className="font-medium text-xs bg-gray-100 px-2 py-1 rounded">

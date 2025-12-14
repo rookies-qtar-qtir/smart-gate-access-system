@@ -32,10 +32,10 @@ function Users() {
 		fetchUsers();
 	}, []);
 
-	const checkUidUnique = (uid, excludeId = null) => {
+	const checkUidUnique = (pid, excludeId = null) => {
 		return !users.some(
 			(user) =>
-				user.uid.toLowerCase() === uid.toLowerCase() &&
+				user.pid.toLowerCase() === pid.toLowerCase() &&
 				user.id !== excludeId
 		);
 	};
@@ -51,12 +51,12 @@ function Users() {
 	const handleSubmit = async (values) => {
 		console.log("Form values submitted:", values);
 
-		if (!editingUser && !checkUidUnique(values.uid)) {
+		if (!editingUser && !checkUidUnique(values.pid)) {
 			message.error("UID already exists! Please use a unique UID.");
 			return;
 		}
 
-		if (editingUser && !checkUidUnique(values.uid, editingUser.id)) {
+		if (editingUser && !checkUidUnique(values.pid, editingUser.id)) {
 			message.error("UID already exists! Please use a unique UID.");
 			return;
 		}
@@ -74,7 +74,7 @@ function Users() {
 		setLoading(true);
 		try {
 			const userData = {
-				uid: values.uid,
+				pid: values.pid,
 				name: values.name,
 				email: values.email,
 				isActive: values.isActive !== undefined ? values.isActive : true,
@@ -139,7 +139,7 @@ function Users() {
 
 		if (user) {
 			form.setFieldsValue({
-				uid: user.uid,
+				pid: user.pid,
 				name: user.name,
 				email: user.email,
 				isActive: user.isActive,

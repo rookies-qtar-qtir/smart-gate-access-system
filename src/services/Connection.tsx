@@ -99,8 +99,8 @@ export const MQTTProvider = ({ children, webcamRef }: MQTTProviderProps) => {
           setRfidPayload(parsedPayload);
           setLastStatusReceived(Date.now());
 
-          if (parsedPayload.uid) {
-            void processRFIDAccess(parsedPayload.uid);
+          if (parsedPayload.pid) {
+            void processRFIDAccess(parsedPayload.pid);
           }
         } catch (error) {
           console.error("Failed to parse RFID payload:", error);
@@ -222,18 +222,18 @@ export const MQTTProvider = ({ children, webcamRef }: MQTTProviderProps) => {
     connectAttemptsRef.current = 0;
   };
 
-  const processRFIDAccess = async (uid: string): Promise<AccessProcessResult | null> => {
+  const processRFIDAccess = async (pid: string): Promise<AccessProcessResult | null> => {
     try {
       const imageFile = webcamRef?.current?.captureImage?.();
 
-      const accessResult = await accessLogsApi.processRFIDAccess(uid, imageFile);
+      const accessResult = await accessLogsApi.processRFIDAccess(pid, imageFile);
       console.log("Access result:", accessResult);
 
-      const user = await userService.getUserByUid(uid);
+      const user = await userService.getUserByUid(pid);
       console.log("User found:", user);
 
       if (accessResult?.data?.access === true) {
-        const name = user ? user.name : uid;
+        const name = user ? user.name : pid;
         antdMessage.success(`Access granted for ${name}`);
 
         const gateOpenPayload = JSON.stringify({ 
@@ -242,7 +242,7 @@ export const MQTTProvider = ({ children, webcamRef }: MQTTProviderProps) => {
         });
         sendMessage(CONFIG.topicPub.controlTopic, gateOpenPayload);
       } else {
-        const name = user ? user.name : uid;
+        const name = user ? user.name : pid;
         antdMessage.error(`Access denied for ${name}: ${accessResult.message}`);
       }
 
@@ -252,7 +252,7 @@ export const MQTTProvider = ({ children, webcamRef }: MQTTProviderProps) => {
       antdMessage.error("Error processing RFID access");
 
       try {
-        const errorResult = await accessLogsApi.processRFIDAccess(uid);
+        const errorResult = await accessLogsApi.processRFIDAccess(pid);
         return errorResult;
       } catch (logError) {
         console.error("Error logging access attempt:", logError);

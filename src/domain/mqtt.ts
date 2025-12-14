@@ -16,7 +16,7 @@ export interface ControlPayload {
 }
 
 export interface RfidPayload {
-  uid?: string;
+  pid?: string;
   [key: string]: unknown;
 }
 

@@ -108,7 +108,7 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 									UID
 								</p>
 								<p className="font-mono text-sm bg-white px-3 py-2 rounded-md border shadow-sm">
-									{searchResult.uid}
+									{searchResult.pid}
 								</p>
 							</div>
 							<div>

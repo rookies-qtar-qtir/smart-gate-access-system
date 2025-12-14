@@ -157,9 +157,9 @@ class UserService {
     return response.data;
   }
 
-  async getUserByUid(uid: string): Promise<User | null> {
+  async getUserByUid(pid: string): Promise<User | null> {
     try {
-      const response = await this.client.get<ApiEnvelope<User>>(`${API_CONFIG.ENDPOINTS.USERS}/uid/${uid}`);
+      const response = await this.client.get<ApiEnvelope<User>>(`${API_CONFIG.ENDPOINTS.USERS}/pid/${pid}`);
       return response.data ?? null;
     } catch (error) {
       const normalized = error as ApiError;
@@ -210,9 +210,9 @@ class AccessLogService {
     return response.data ?? [];
   }
 
-  async getByUid(uid: string): Promise<AccessLogEntry[]> {
+  async getByUid(pid: string): Promise<AccessLogEntry[]> {
     const response = await this.client.get<ApiEnvelope<AccessLogEntry[]>>(
-      `${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/uid/${uid}`
+      `${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/pid/${pid}`
     );
     return response.data ?? [];
   }
@@ -242,9 +242,9 @@ class AccessLogService {
     return response.data ?? [];
   }
 
-  async processRFIDAccess(uid: string, imageFile?: Blob | null): Promise<AccessProcessResponse> {
+  async processRFIDAccess(pid: string, imageFile?: Blob | null): Promise<AccessProcessResponse> {
     const formData = new FormData();
-    formData.append("uid", uid);
+    formData.append("pid", pid);
     if (imageFile) {
       formData.append("image", imageFile);
     }

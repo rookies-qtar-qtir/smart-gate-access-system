@@ -28,7 +28,7 @@ function AccessLog() {
       console.log('RFID processing completed, refreshing access logs...', event.detail);
       try {
         await refreshData();
-        // message.success(`UID: ${event.detail.uid} processed successfully`);
+        // message.success(`UID: ${event.detail.pid} processed successfully`);
       } catch (error) {
         console.error('Failed to refresh access logs after RFID processing:', error);
       }
@@ -50,7 +50,7 @@ function AccessLog() {
 
     if (searchUid) {
       filtered = filtered.filter(log =>
-        log.uid.toLowerCase().includes(searchUid.toLowerCase())
+        log.pid.toLowerCase().includes(searchUid.toLowerCase())
       );
     }
 

@@ -1,7 +1,7 @@
 export interface User {
   id?: number | string;
   user_id?: number | string;
-  uid: string;
+  pid: string;
   name: string;
   email: string;
   role?: string;

@@ -47,13 +47,13 @@ function AccessLogTable({ logs, loading }) {
 		},
 		{
 			title: "UID",
-			dataIndex: "uid",
-			key: "uid",
+			dataIndex: "pid",
+			key: "pid",
 			width: 170,
-			render: (uid) => (
+			render: (pid) => (
 				<span className="font-medium text-xs bg-gray-100 px-2 py-1 rounded">
 					<KeyOutlined className="mr-2" />
-					{uid}
+					{pid}
 				</span>
 			),
 		},

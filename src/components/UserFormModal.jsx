@@ -54,7 +54,7 @@ function UserFormModal({
 				initialValues={{ isActive: true }}>
 				<Form.Item
 					label="UID"
-					name="uid"
+					name="pid"
 					rules={[
 						{ required: true, message: "Please input the UID!" },
 						{
@@ -81,7 +81,7 @@ function UserFormModal({
 						style={{ fontFamily: "monospace" }}
 						onChange={(e) => {
 							const value = e.target.value.toLowerCase();
-							form.setFieldsValue({ uid: value });
+							form.setFieldsValue({ pid: value });
 						}}
 					/>
 				</Form.Item>
