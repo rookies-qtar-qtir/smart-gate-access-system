@@ -8,30 +8,31 @@ import {
 function AccessLogStats({ stats }) {
 	return (
 		<Row gutter={16} className="mt-4">
-			<Col span={8}>
+			<Col xs={24} sm={24} md={8}>
 				<Card>
 					<Statistic
 						title="Total Access Attempts"
-						value={stats.total}
+						value={stats?.total || 0}
 						prefix={<SearchOutlined />}
+						valueStyle={{ color: "#1890ff" }}
 					/>
 				</Card>
 			</Col>
-			<Col span={8}>
+			<Col xs={24} sm={24} md={8}>
 				<Card>
 					<Statistic
 						title="Granted Access"
-						value={stats.granted}
+						value={stats?.granted || 0}
 						valueStyle={{ color: "#3f8600" }}
 						prefix={<CheckCircleOutlined />}
 					/>
 				</Card>
 			</Col>
-			<Col span={8}>
+			<Col xs={24} sm={24} md={8}>
 				<Card>
 					<Statistic
 						title="Denied Access"
-						value={stats.denied}
+						value={stats?.denied || 0}
 						valueStyle={{ color: "#cf1322" }}
 						prefix={<CloseCircleOutlined />}
 					/>

@@ -1,49 +1,56 @@
-import {
-  FaUsers,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaChartLine,
-  FaChartBar
-} from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaClipboardList } from 'react-icons/fa';
 
 function AccessSummaryCards({ stats }) {
-  const successRate = stats.total > 0 ? ((stats.granted / stats.total) * 100).toFixed(1) : 0;
+  const cards = [
+    {
+      title: 'Total Akses',
+      value: stats.total || 0,
+      icon: <FaClipboardList className="text-4xl" />,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      borderColor: 'border-blue-500',
+    },
+    {
+      title: 'Akses Diterima',
+      value: stats.granted || 0,
+      icon: <FaCheckCircle className="text-4xl" />,
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600',
+      borderColor: 'border-green-500',
+    },
+    {
+      title: 'Akses Ditolak',
+      value: stats.denied || 0,
+      icon: <FaTimesCircle className="text-4xl" />,
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-600',
+      borderColor: 'border-red-500',
+    },
+  ];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-        <FaChartBar className="mr-2 text-blue-600" />
-        Ringkasan Akses
-      </h3>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-          <div className="flex items-center">
-            <FaUsers className="text-blue-600 mr-2" />
-            <span className="font-medium">Total Akses</span>
+    <div className="col-span-1 lg:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {cards.map((card, index) => (
+          <div
+            key={index}
+            className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${card.borderColor} hover:shadow-lg transition-shadow duration-300`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  {card.title}
+                </p>
+                <p className="text-3xl font-bold text-gray-800">
+                  {card.value.toLocaleString()}
+                </p>
+              </div>
+              <div className={`${card.iconBg} p-4 rounded-full ${card.iconColor}`}>
+                {card.icon}
+              </div>
+            </div>
           </div>
-          <span className="text-2xl font-bold text-blue-600">{stats.total}</span>
-        </div>
-        <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-          <div className="flex items-center">
-            <FaCheckCircle className="text-green-600 mr-2" />
-            <span className="font-medium">Akses Diterima</span>
-          </div>
-          <span className="text-2xl font-bold text-green-600">{stats.granted}</span>
-        </div>
-        <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-          <div className="flex items-center">
-            <FaTimesCircle className="text-red-600 mr-2" />
-            <span className="font-medium">Akses Ditolak</span>
-          </div>
-          <span className="text-2xl font-bold text-red-600">{stats.denied}</span>
-        </div>
-        <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-          <div className="flex items-center">
-            <FaChartLine className="text-purple-600 mr-2" />
-            <span className="font-medium">Success Rate</span>
-          </div>
-          <span className="text-2xl font-bold text-purple-600">{successRate}%</span>
-        </div>
+        ))}
       </div>
     </div>
   );

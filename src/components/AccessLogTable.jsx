@@ -24,28 +24,6 @@ function AccessLogTable({ logs, loading }) {
 			defaultSortOrder: "descend",
 		},
 		{
-			title: "Vehicle",
-			dataIndex: "vehicle",
-			key: "vehicle",
-			width: 150,
-			render: (vehicle) => (
-				<span className="font-medium">
-					{vehicle ? vehicle : <span className="text-gray-400">Unknown</span>}
-				</span>
-			),
-		},
-		{
-			title: "Plate Number",
-			dataIndex: "plateNumber",
-			key: "plateNumber",
-			width: 150,
-			render: (plateNumber) => (
-				<span className="font-medium">
-					{plateNumber || <span className="text-gray-400">Unknown</span>}
-				</span>
-			),
-		},
-		{
 			title: "PID",
 			dataIndex: "pid",
 			key: "pid",
@@ -53,7 +31,7 @@ function AccessLogTable({ logs, loading }) {
 			render: (pid) => (
 				<span className="font-medium text-xs bg-gray-100 px-2 py-1 rounded">
 					<KeyOutlined className="mr-2" />
-					{pid}
+					{pid || "-"}
 				</span>
 			),
 		},
@@ -76,7 +54,7 @@ function AccessLogTable({ logs, loading }) {
 			title: "Status",
 			dataIndex: "status",
 			key: "status",
-			width: 100,
+			width: 120,
 			render: (status) => (
 				<Tag
 					color={status === "GRANTED" ? "green" : "red"}
@@ -86,8 +64,9 @@ function AccessLogTable({ logs, loading }) {
 						) : (
 							<CloseCircleOutlined />
 						)
-					}>
-					{status}
+					}
+				>
+					{status || "-"}
 				</Tag>
 			),
 			filters: [
@@ -97,11 +76,38 @@ function AccessLogTable({ logs, loading }) {
 			onFilter: (value, record) => record.status === value,
 		},
 		{
+			title: "Vehicle",
+			dataIndex: "vehicle",
+			key: "vehicle",
+			width: 150,
+			render: (vehicle) => (
+				<span className="font-medium">
+					{vehicle ? vehicle : <span className="text-gray-400">-</span>}
+				</span>
+			),
+		},
+		{
+			title: "Plate Number",
+			dataIndex: "plateNumber",
+			key: "plateNumber",
+			width: 150,
+			render: (plateNumber) => (
+				<span className="font-medium">
+					{plateNumber || <span className="text-gray-400">-</span>}
+				</span>
+			),
+		},
+		{
 			title: "Reason",
 			dataIndex: "reason",
 			key: "reason",
+			ellipsis: true,
 			render: (reason) =>
-				reason || <span className="text-gray-400">-</span>,
+				reason ? (
+					<span className="text-sm">{reason}</span>
+				) : (
+					<span className="text-gray-400">-</span>
+				),
 		},
 	];
 
@@ -143,7 +149,7 @@ function AccessLogTable({ logs, loading }) {
 					onChange: handlePaginationChange,
 					onShowSizeChange: handleShowSizeChange,
 				}}
-				scroll={{ x: 800 }}
+				scroll={{ x: 1000 }}
 				className="border rounded-lg"
 			/>
 		</section>

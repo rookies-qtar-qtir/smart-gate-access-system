@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -12,7 +12,6 @@ import GateControl from './pages/GateControl';
 import Login from './pages/Login';
 import { MQTTProvider } from "./services/Connection";
 import { AuthProvider } from './services/AuthContext';
-import { AccessLogProvider } from './services/AccessLogContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import FloatingWebcamButton from './components/FloatingWebcamButton';
 import WebcamComponent from './components/Webcam';
@@ -48,9 +47,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="/login" element={<Login />} />
               <Route path="/" element={
                 <ProtectedRoute>
-                  <AccessLogProvider>
-                    <App />
-                  </AccessLogProvider>
+                  <App />
                 </ProtectedRoute>
               }>
                 <Route index element={<Home />} />

@@ -2,10 +2,8 @@ import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { FaChartLine } from 'react-icons/fa';
 import AccessSummaryCards from './AccessSummaryCards';
-import AccessDistributionChart from './AccessDistributionChart';
-import AccessTrendChart from './AccessTrendChart';
 
-function AccessStatistics({ stats, loading, accessLogs }) {
+function AccessStatistics({ stats, loading }) {
   const navigate = useNavigate();
 
   if (loading) {
@@ -48,8 +46,6 @@ function AccessStatistics({ stats, loading, accessLogs }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AccessSummaryCards stats={stats} />
-        <AccessDistributionChart stats={stats} />
-        <AccessTrendChart stats={stats} accessLogs={accessLogs} />
       </div>
     </section>
   );

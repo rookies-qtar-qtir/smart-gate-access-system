@@ -5,10 +5,12 @@ import StatusAlert from "../components/StatusAlert";
 import AccessLogStats from "../components/AccessLogStats";
 import AccessLogFilters from "../components/AccessLogFilters";
 import AccessLogTable from "../components/AccessLogTable";
-import { useAccessLog } from '../services/AccessLogContext';
+import { accessLogsApi } from '../services/api';
 
 function AccessLog() {
-  const { accessLogs: globalAccessLogs, stats: globalStats, loading: globalLoading, refreshData } = useAccessLog();
+  const [allAccessLogs, setAllAccessLogs] = useState([]);
+  const [stats, setStats] = useState({ total: 0, granted: 0, denied: 0 });
+  const [loading, setLoading] = useState(true);
 
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -16,19 +18,18 @@ function AccessLog() {
   const [dateRange, setDateRange] = useState(null);
 
   useEffect(() => {
-    refreshData();
+    fetchAllData();
   }, []);
 
   useEffect(() => {
     applyFilters();
-  }, [globalAccessLogs, filterStatus, searchPid, dateRange]);
+  }, [allAccessLogs, filterStatus, searchPid, dateRange]);
 
   useEffect(() => {
     const handleRFIDProcessComplete = async (event) => {
       console.log('RFID processing completed, refreshing access logs...', event.detail);
       try {
-        await refreshData();
-        // message.success(`PID: ${event.detail.pid} processed successfully`);
+        await fetchAllData();
       } catch (error) {
         console.error('Failed to refresh access logs after RFID processing:', error);
       }
@@ -39,16 +40,36 @@ function AccessLog() {
     return () => {
       window.removeEventListener('rfidProcessComplete', handleRFIDProcessComplete);
     };
-  }, [refreshData]);
+  }, []);
+
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+
+      const [logs, summary] = await Promise.all([
+        accessLogsApi.getAll(),
+        accessLogsApi.getSummary()
+      ]);
+
+      setAllAccessLogs(logs);
+      setStats(summary);
+
+    } catch (error) {
+      console.error('Failed to fetch access logs:', error);
+      message.error('Failed to fetch access logs');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const applyFilters = () => {
-    let filtered = [...globalAccessLogs];
+    let filtered = [...allAccessLogs];
 
     if (filterStatus !== 'all') {
       filtered = filtered.filter(log => log.status === filterStatus);
     }
 
-    if (searchPid) {
+    if (searchPid.trim()) {
       filtered = filtered.filter(log =>
         log.pid.toLowerCase().includes(searchPid.toLowerCase())
       );
@@ -75,7 +96,7 @@ function AccessLog() {
 
   const handleRefresh = async () => {
     try {
-      await refreshData();
+      await fetchAllData();
       message.success('Data refreshed successfully');
     } catch (error) {
       message.error('Failed to refresh data');
@@ -88,7 +109,7 @@ function AccessLog() {
 
       {/* Stats Section */}
       <div className="mb-3">
-        <AccessLogStats stats={globalStats} />
+        <AccessLogStats stats={stats} />
       </div>
 
       {/* Filters Section */}
@@ -101,14 +122,14 @@ function AccessLog() {
           dateRange={dateRange}
           onDateRangeFilter={handleDateRangeFilter}
           onRefresh={handleRefresh}
-          loading={globalLoading}
+          loading={loading}
         />
       </div>
 
       {/* Logs Table Section */}
       <AccessLogTable
         logs={filteredLogs}
-        loading={globalLoading}
+        loading={loading}
       />
     </div>
   );

@@ -40,16 +40,16 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('API Response Error:', error.response?.data || error.message);
-    
+
     if (error.response?.status === 401) {
       const isLoginRequest = error.config?.url?.includes('/auth/login');
-      
+
       if (!isLoginRequest) {
         localStorage.removeItem('access_token');
         window.location.href = '/login';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -159,6 +159,16 @@ export const userService = {
 };
 
 export const accessLogsApi = {
+  async getSummary() {
+    try {
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/summary`);
+      return response.data.data || { total: 0, granted: 0, denied: 0 };
+    } catch (error) {
+      console.error('Error fetching access logs summary:', error);
+      throw error;
+    }
+  },
+
   async getAll() {
     try {
       const response = await api.get(API_CONFIG.ENDPOINTS.ACCESS_LOGS);
@@ -230,7 +240,7 @@ export const accessLogsApi = {
           },
         }
       );
-  
+
       return response.data;
     } catch (error) {
       console.error('Error processing RFID access:', error);
