@@ -38,8 +38,8 @@ const WebcamComponent = forwardRef((props, ref) => {
   }, []);
 
   const videoConstraints = {
-    width: 320,
-    height: 240,
+    width: { min: 1920 },
+    height: { min: 1080 },
     deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
   };
 
@@ -68,6 +68,8 @@ const WebcamComponent = forwardRef((props, ref) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      message.success("Gambar berhasil di-capture dan didownload!");
     } else {
       message.error("Gagal menangkap gambar");
     }
@@ -88,7 +90,6 @@ const WebcamComponent = forwardRef((props, ref) => {
 
   if (!visible) return null;
 
-
   return (
     <div
       style={{
@@ -98,8 +99,8 @@ const WebcamComponent = forwardRef((props, ref) => {
         zIndex: 1000,
         width: 360,
         opacity: viewHidden ? 0 : 1,
-        pointerEvents: viewHidden ? 'none' : 'auto',
-        transition: 'opacity 0.3s ease-in-out'
+        pointerEvents: viewHidden ? "none" : "auto",
+        transition: "opacity 0.3s ease-in-out",
       }}
     >
       <Card title="Live Camera" size="small" bodyStyle={{ padding: 10 }}>
@@ -119,7 +120,13 @@ const WebcamComponent = forwardRef((props, ref) => {
           audio={false}
           screenshotFormat="image/jpeg"
           videoConstraints={videoConstraints}
-          style={{ width: "100%", borderRadius: 8 }}
+          screenshotQuality={1}
+          forceScreenshotSourceSize={true}
+          style={{
+            width: "100%",
+            borderRadius: 8,
+            maxWidth: "100%",
+          }}
         />
         <Button
           type="primary"

@@ -66,20 +66,6 @@ export const authService = {
       console.error('Login error:', error);
       throw error;
     }
-  },
-
-  getProfile: async () => {
-    try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.AUTH}/profile`);
-      return response.data.data;
-    } catch (error) {
-      console.error('Get profile error:', error);
-      throw error;
-    }
-  },
-
-  logout: () => {
-    localStorage.removeItem('access_token');
   }
 };
 
@@ -90,16 +76,6 @@ export const userService = {
       return response.data.data || [];
     } catch (error) {
       console.error('Error fetching users:', error);
-      throw error;
-    }
-  },
-
-  getUserById: async (id) => {
-    try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS}/${id}`);
-      return response.data.data;
-    } catch (error) {
-      console.error('Error fetching user:', error);
       throw error;
     }
   },
@@ -178,51 +154,7 @@ export const accessLogsApi = {
       throw error;
     }
   },
-
-  async getByPid(pid) {
-    try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/pid/${pid}`);
-      return response.data.data || [];
-    } catch (error) {
-      console.error('Error fetching access logs by PID:', error);
-      throw error;
-    }
-  },
-
-  async getByDateRange(startDate, endDate) {
-    try {
-      const params = new URLSearchParams({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-      });
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/date-range?${params}`);
-      return response.data.data || [];
-    } catch (error) {
-      console.error('Error fetching access logs by date range:', error);
-      throw error;
-    }
-  },
-
-  async getGranted() {
-    try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/granted`);
-      return response.data.data || [];
-    } catch (error) {
-      console.error('Error fetching granted access logs:', error);
-      throw error;
-    }
-  },
-
-  async getDenied() {
-    try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/denied`);
-      return response.data.data || [];
-    } catch (error) {
-      console.error('Error fetching denied access logs:', error);
-      throw error;
-    }
-  },
-
+  
   async processRFIDAccess(pid, imageFile) {
     try {
       const formData = new FormData();

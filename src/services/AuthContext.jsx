@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/api';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
@@ -20,28 +21,36 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = () => {
     try {
       const token = localStorage.getItem('access_token');
-      if (token) {
-        const userData = await authService.getProfile();
 
-        console.log('Profile data received:', userData);
+      if (token) {
+        const decoded = jwtDecode(token);
+
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          console.warn('Token expired');
+          logout();
+          setLoading(false);
+          return;
+        }
+
+        console.log('Decoded token:', decoded);
 
         const userInfo = {
-          id: userData.id || userData.user_id,
-          name: userData.name || userData.username,
-          email: userData.email,
-          role: userData.role || 'user'
+          id: decoded.sub,
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role,
+          pid: decoded.pid
         };
-
-        console.log('Processed user info:', userInfo);
 
         setUser(userInfo);
         setIsAuthenticated(true);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('Token invalid:', error);
       logout();
     } finally {
       setLoading(false);
@@ -51,32 +60,30 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-
       console.log('Login response:', response);
 
       let access_token, userInfo;
 
       if (response.data) {
         access_token = response.data.access_token;
-        userInfo = {
-          id: response.data.id || response.data.user_id,
-          name: response.data.name || response.data.username,
-          email: response.data.email,
-          role: response.data.role || 'user'
-        };
       } else {
         access_token = response.access_token;
-        userInfo = {
-          id: response.id || response.user_id,
-          name: response.name || response.username,
-          email: response.email,
-          role: response.role || 'user'
-        };
       }
 
-      console.log('Processed login user info:', userInfo);
-
       localStorage.setItem('access_token', access_token);
+
+      const decoded = jwtDecode(access_token);
+
+      userInfo = {
+        id: decoded.sub,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+        pid: decoded.pid
+      };
+
+      console.log('User info set from token:', userInfo);
+
       setUser(userInfo);
       setIsAuthenticated(true);
 
@@ -110,5 +117,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-
 };

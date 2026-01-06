@@ -23,11 +23,18 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 		setSearchLoading(true);
 		try {
 			const user = await userService.getUserByPid(searchPid.trim());
+
+			if (!user) {
+				setSearchResult(null);
+				message.error("User not found");
+				return;
+			}
+
 			setSearchResult(user);
 			message.success("User found successfully");
 		} catch (error) {
 			setSearchResult(null);
-			message.error("User not found or error occurred");
+			message.error("Error occurred while searching");
 			console.error("Error:", error);
 		} finally {
 			setSearchLoading(false);
