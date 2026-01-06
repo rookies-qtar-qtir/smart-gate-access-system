@@ -55,10 +55,11 @@ function UserSearch({ onEditUser, onDeleteUser, onUserUpdated }) {
 		}
 	};
 
-	const handleDelete = async (userId) => {
-		await onDeleteUser(userId);
-		setSearchResult(null);
-		setSearchPid("");
+	const handleDelete = (userId) => {
+		onDeleteUser(userId, () => {
+			setSearchResult(null);
+			setSearchPid("");
+		});
 	};
 
 	return (

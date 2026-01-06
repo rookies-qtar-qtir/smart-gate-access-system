@@ -6,6 +6,7 @@ import StatusAlert from "../components/StatusAlert";
 import UserSearch from "../components/UserSearch";
 import UserTable from "../components/UserTable";
 import UserFormModal from "../components/UserFormModal";
+import PinModal from "../components/PinModal";
 
 function Users() {
 	const [users, setUsers] = useState([]);
@@ -13,6 +14,9 @@ function Users() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [editingUser, setEditingUser] = useState(null);
 	const [onUserUpdatedCallback, setOnUserUpdatedCallback] = useState(null);
+	const [isPinOpen, setIsPinOpen] = useState(false);
+	const [selectedUserId, setSelectedUserId] = useState(null);
+	const [deleteCallback, setDeleteCallback] = useState(null);
 	const [form] = Form.useForm();
 
 	const fetchUsers = async () => {
@@ -115,18 +119,14 @@ function Users() {
 		}
 	};
 
-	const handleDelete = async (userId) => {
-		setLoading(true);
-		try {
-			await userService.deleteUser(userId);
-			message.success("User deleted successfully");
-			fetchUsers();
-		} catch (error) {
-			message.error("Failed to delete user");
-			console.error("Error:", error);
-		} finally {
-			setLoading(false);
-		}
+	const handleDelete = (userId) => {
+		setSelectedUserId(userId);
+		setIsPinOpen(true);
+	};
+
+	const handleDeleteWithCallback = (userId, onSuccess) => {
+		setDeleteCallback(() => onSuccess || null);
+		handleDelete(userId);
 	};
 
 	const handleUserUpdated = (callback) => {
@@ -160,6 +160,21 @@ function Users() {
 		form.resetFields();
 	};
 
+	const handlePinClose = () => {
+		setIsPinOpen(false);
+		setSelectedUserId(null);
+		setDeleteCallback(null);
+	};
+
+	const handleUserDeleted = () => {
+		fetchUsers();
+		if (deleteCallback) {
+			deleteCallback();
+			setDeleteCallback(null);
+		}
+		setSelectedUserId(null);
+	};
+
 	return (
 		<div className="p-6">
 			<StatusAlert />
@@ -185,7 +200,7 @@ function Users() {
 			{/* Search User Component */}
 			<UserSearch
 				onEditUser={handleEditUser}
-				onDeleteUser={handleDelete}
+				onDeleteUser={handleDeleteWithCallback}
 				onUserUpdated={handleUserUpdated}
 			/>
 
@@ -208,6 +223,13 @@ function Users() {
 				users={users}
 				checkPidUnique={checkPidUnique}
 				checkEmailUnique={checkEmailUnique}
+			/>
+
+			<PinModal
+				open={isPinOpen}
+				userId={selectedUserId}
+				onCancel={handlePinClose}
+				onDeleted={handleUserDeleted}
 			/>
 		</div>
 	);
