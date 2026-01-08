@@ -68,7 +68,7 @@ function PinModal({ open, userId, onCancel, onDeleted }) {
 				}
 
 				if (response.status === 401) {
-					message.error("gagal hapus user");
+					message.error("Pin salah");
 					setIsShaking(true);
 					setTimeout(() => {
 						setIsShaking(false);

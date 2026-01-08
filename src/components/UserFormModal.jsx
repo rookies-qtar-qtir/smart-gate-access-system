@@ -125,24 +125,17 @@ function UserFormModal({
 				<Form.Item
 					label="Plate Number"
 				>
-					<Form.List name="plateNumber" rules={[
-						{
-							validator: async (_, names) => {
-								if (!names || names.length < 1) {
-									return Promise.reject(new Error('Please input at least one plate number!'));
-								}
-							},
-						},
-					]}>
+					<Form.List name="plateNumber">
 						{(fields, { add, remove }) => (
 							<>
 								{fields.map(({ key, name, ...restField }) => (
 									<Form.Item
 										key={key}
-										required
 										{...restField}
 										name={name}
-										rules={[{ required: false, message: 'Please input the plate number!' }]}
+										rules={[
+											{ required: true, message: 'Please input the plate number!' }
+										]}
 									>
 										<Input
 											placeholder="Enter plate number"

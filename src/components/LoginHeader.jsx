@@ -7,7 +7,7 @@ const LoginHeader = () => {
                 <DesktopOutlined className="text-3xl text-blue-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-800">Smart Gate</h1>
-            <p className="text-gray-600 mt-2">Hello Admin, Ready to Manage?</p>
+            <p className="text-gray-600 mt-2">Hello Operator, Ready to Manage?</p>
         </div>
     );
 };

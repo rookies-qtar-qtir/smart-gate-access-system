@@ -184,6 +184,16 @@ export const accessLogsApi = {
       };
     }
   },
+
+  async openManual() {
+    try {
+      const response = await api.post(`${API_CONFIG.ENDPOINTS.ACCESS_LOGS}/manual`);
+      return response.data;
+    } catch (error) {
+      console.error('Error opening gate manually:', error);
+      throw error;
+    }
+  },
 };
 
 export { api, API_CONFIG };

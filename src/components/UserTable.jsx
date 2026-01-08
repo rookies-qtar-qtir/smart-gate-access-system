@@ -90,7 +90,7 @@ function UserTable({ users, loading, onEditUser, onDeleteUser }) {
 				</span>
 			),
 			filters: [
-				{ text: "ADMIN", value: "ADMIN" },
+				{ text: "OPERATOR", value: "OPERATOR" },
 				{ text: "PENGHUNI", value: "PENGHUNI" },
 			],
 			onFilter: (value, record) => record.role === value,
