@@ -86,14 +86,14 @@ function Sidebar({ collapsed, setCollapsed }) {
             />
         </div>
 
-        {/* Test Components - Hanya tampil dalam development */}
+        {/* Test Components - Hanya tampil dalam development
         {process.env.NODE_ENV === 'development' && (
           <div className="border-t border-gray-700 p-2 space-y-1">
             <TestPublisher />
             <RFIDTestPublisher />
             <PublishControl />
           </div>
-        )}
+        )} */}
         
         {/* User Profile Section */}
         {user && (

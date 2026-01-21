@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { message } from 'antd';
+import { message, Button } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import StatusAlert from "../components/StatusAlert";
 import AccessLogStats from "../components/AccessLogStats";
@@ -103,6 +104,34 @@ function AccessLog() {
     }
   };
 
+  // const exportToCSV = () => {
+  //   const headers = ['No', 'PID', 'Name', 'Status', 'Timestamp', 'Reason'];
+
+  //   const rows = filteredLogs.map((log, idx) => [
+  //     idx + 1,
+  //     log.pid || '-',
+  //     log.name || '-',
+  //     log.status || '-',
+  //     dayjs(log.timestamp).format('DD/MM/YYYY HH:mm:ss'),
+  //     log.reason || '-'
+  //   ]);
+
+  //   const csvContent = [
+  //     headers.join(','),
+  //     ...rows.map(row => row.map(col => `"${col}"`).join(','))
+  //   ].join('\n');
+
+  //   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  //   const url = URL.createObjectURL(blob);
+
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.download = `access-logs-${dayjs().format('YYYY-MM-DD-HHmmss')}.csv`;
+  //   link.click();
+
+  //   message.success('CSV berhasil diunduh');
+  // };
+
   return (
     <div className="p-6">
       <StatusAlert />
@@ -113,18 +142,30 @@ function AccessLog() {
       </div>
 
       {/* Filters Section */}
-      <div className="my-3">
-        <AccessLogFilters
-          searchPid={searchPid}
-          setSearchPid={setSearchPid}
-          filterStatus={filterStatus}
-          onStatusFilter={handleStatusFilter}
-          dateRange={dateRange}
-          onDateRangeFilter={handleDateRangeFilter}
-          onRefresh={handleRefresh}
-          loading={loading}
-        />
+      <div className="my-3 flex justify-between items-center gap-3">
+        <div className="flex-1">
+          <AccessLogFilters
+            searchPid={searchPid}
+            setSearchPid={setSearchPid}
+            filterStatus={filterStatus}
+            onStatusFilter={handleStatusFilter}
+            dateRange={dateRange}
+            onDateRangeFilter={handleDateRangeFilter}
+            onRefresh={handleRefresh}
+            loading={loading}
+          />
+        </div>
+
+        {/* <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          onClick={exportToCSV}
+          disabled={filteredLogs.length === 0}
+        >
+          Export CSV
+        </Button> */}
       </div>
+
 
       {/* Logs Table Section */}
       <AccessLogTable

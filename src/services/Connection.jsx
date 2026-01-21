@@ -16,6 +16,7 @@ export const MQTTProvider = ({ children, webcamRef }) => {
 
   const maxReconnectAttempts = 5;
   const heartbeatTimeout = 30000;
+  const missedHeartbeatRef = useRef(0);
 
   const [deviceStatus, setDeviceStatus] = useState({
     online: false,
@@ -76,7 +77,12 @@ export const MQTTProvider = ({ children, webcamRef }) => {
       if (topic === CONFIG.topics.statusTopic) {
         try {
           const parsedPayload = JSON.parse(payload);
-          setDeviceStatus(parsedPayload);
+          missedHeartbeatRef.current = 0;
+          setDeviceStatus((prev) => ({
+            ...prev,
+            ...parsedPayload,
+            online: true,
+          }));
           setLastStatusReceived(Date.now());
         } catch (error) {
           console.error("Failed to parse device status:", error);
@@ -298,10 +304,23 @@ export const MQTTProvider = ({ children, webcamRef }) => {
 
     const heartbeatChecker = setInterval(() => {
       const now = Date.now();
-      if (now - lastStatusReceived > heartbeatTimeout) {
-        setDeviceStatus((prev) => ({ ...prev, online: false }));
+      const delta = now - lastStatusReceived;
+
+      if (delta > heartbeatTimeout) {
+        missedHeartbeatRef.current += 1;
+
+        if (missedHeartbeatRef.current >= 2) { 
+          setDeviceStatus(prev => ({
+            ...prev,
+            online: false,
+          }));
+        }
+      } else {
+        missedHeartbeatRef.current = 0;
       }
-    }, 10000);
+
+    }, 5000);
+
 
     return () => {
       disconnect();
