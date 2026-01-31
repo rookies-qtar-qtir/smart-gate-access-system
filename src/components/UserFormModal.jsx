@@ -133,9 +133,9 @@ function UserFormModal({
 										key={key}
 										{...restField}
 										name={name}
-										rules={[
-											{ required: true, message: 'Please input the plate number!' }
-										]}
+										// rules={[
+										// 	{ required: false, message: 'Please input the plate number!' }
+										// ]}
 									>
 										<Input
 											placeholder="Enter plate number"
